@@ -1,0 +1,146 @@
+<title>WORSICA | Registration</title>
+{% extends "base_banner_auth.html" %}
+
+{% block content3 %}
+
+{% load i18n %}
+{% load staticfiles %}
+<script type="text/javascript">
+    // Button Submit
+    function onClickSubmit(){
+        //cleanMessage();
+        try {
+            // Validate form
+            var fulfilledRequired = true;
+            $('.form input, .form select').each(function(){            	
+            	$('label[for="'+$(this).prop('name')+'"]').css('color','') 
+                if ($(this).prop('required') && $(this).val() == '') {
+                    fulfilledRequired = false;
+                    $('label[for="'+$(this).prop('name')+'"]').css('color','#ff0000')
+                }
+            });
+            if (!fulfilledRequired) {
+            	buildDynamicModalPopup('Error', 
+					'<p>To proceed, you must fill the required fields</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+                return false;
+            }            
+            else{
+            	if ($('#cpassword').val() != $('#password').val()){//Check passwords
+	            	buildDynamicModalPopup('Error', 
+						'<p>Passwords do not match!</p>', 
+						[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+	                return false;
+	    		}
+	    		else{
+		            // Send form data via client-side
+		            buildDynamicModalPopup('Registering your account', 
+						'<p>Please wait...</p>', 
+						[], [250,220])
+		            formSerialize = $('.form').serialize()
+		            formSerialize += '&affiliation_country='+$('#affiliation_country').val()
+		            console.log(formSerialize)
+		            $.ajax({
+		                type: 'POST',
+		                url: '/accounts/register/post/',
+		                data: formSerialize,
+		                success: function(data) {
+		                	dm.dialog("close")		     	
+		                	if(data['msgtype']=='notice'){
+		                		buildDynamicModalPopup('Success!', 
+									'<p>'+data['message']+'</p>', 
+									[['OK', function(){ 
+										$(this).dialog( "close" )
+										location.href = '/accounts/login/'
+									} ]], [280,250])
+		                	    return true; 
+		               		}
+		               		else{
+		               			buildDynamicModalPopup('Error', 
+									'<p>'+data['message']+'</p>', 
+									[['OK', function(){ $(this).dialog( "close" )} ]], [280,250])
+		               			return false; 
+		               	    }
+		                                 	   
+		                },
+		                error: function(e, x, r) {
+		                    console.log(r + ' - ' + e);
+		                    buildDynamicModalPopup('Error', 
+								'<p>An error occured, try again later.</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		                    return false
+		                }
+		            });
+		        } 
+		    }
+	    } catch(err) {
+            console.log(err);
+            buildDynamicModalPopup('Error', 
+				'<p>An error occured, try again later.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+            return false
+        }
+
+    }
+</script>
+
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<h3>Registration</h3>
+	</div>
+	<div class="col-md-4"></div>
+</div>
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<p>* All fields are required</p>
+		<form class="form" method="post"> {% csrf_token %}
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="name">Name*</label>
+				<input style='display:inline; text-align:right;' class="form-control" type="text" name="name" value="" id="name" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="surname">Surname*</label>
+				<input style='display:inline; padding-left:80px; text-align:right;' class="form-control" type="text" name="surname" value="" id="surname" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>						
+				<label style='display:inline' for="affiliation">Affiliation*</label>
+				<input style='display:inline;  padding-left:80px; text-align:right;' class="form-control" type="text" name="affiliation" value="" id="affiliation" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="affiliation_country">Country*</label>
+				{% load countries %}
+				{% get_countries as countries %}
+				<select style='display:inline; text-align-last: right;' class="form-control" id="affiliation_country" required>
+				{% for country in countries %}
+				    <option value="{{ country.code }}">{{ country.name }}</option>
+				{% endfor %}
+				</select><br><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="email">Email*</label>
+				<input style='display:inline; text-align:right; ' class="form-control" type="text" name="email" value="" id="email" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="password">Password*</label>
+				<input style='display:inline;  padding-left:80px; text-align:right;' class="form-control" type="password" name="password" value="" id="password" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="password">Confirm Password*</label>
+				<input style='display:inline; padding-left:140px; text-align:right;' class="form-control" type="password" name="cpassword" value="" id="cpassword" required><br>
+			</div>
+		</form>
+		<div style='text-align: center'>
+			<a id='btnRegister' class="btn btn-primary" onclick='onClickSubmit()'>Register</a>
+		</div>
+		<hr>
+		<div style='text-align: center'>
+			<p>Or authenticate using EGI-AAI federated autentication. Click on the icon below to start.</p>
+			<a class='btn btn-default' href='/auth'><img height=40px src='/static/images/egi.png'></img></a>
+		</div>
+	</div>
+	<div class="col-md-4"> </div>
+</div>
+{% endblock %}
+

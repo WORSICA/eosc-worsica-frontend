@@ -1,0 +1,16 @@
+<!--Available for all the pages who extend base.html -->
+{% load staticfiles %}
+{% url 'home_inland' as home_inland %}
+{% url 'home_coastal' as home_coastal %}
+{% url 'home_waterleak' as home_waterleak %}
+{% url 'login_egi' as login_egi %}
+
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+{% include "essentials/_essentials.html" %}<!-- custom styles included -->
+
+{% include "components/header.html" %}
+{% include "components/_js_popup_widget.html" %}
+<div class='bgImage'>
+{% block content %}{% endblock %}
+</div>
+{% include "components/footer.html" %} 

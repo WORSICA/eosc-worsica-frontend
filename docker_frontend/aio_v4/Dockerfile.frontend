@@ -1,0 +1,43 @@
+#DOCKER FRONTEND
+FROM worsica/worsica-essentials:development
+MAINTAINER Ricardo Martins <rjmartins@lnec.pt>
+
+ENV PSYCOPG_VERSION 2.8.5 #2.8.4
+#ENV DJANGO_AUTH_OIDC_VERSION 0.6.0
+ENV DJANGO_COUNTRIES_VERSION 6.1.2
+ENV DJANGO_REQUEST_VERSION 1.5.6 #user statistics
+ENV XLWT_VERSION 1.3.0
+
+#build manually requirements file instead of importing it from the host or from git repository.
+RUN cd $HOME \
+    && echo -e " \
+        Django==${DJANGO_VERSION} \n\
+        psycopg2-binary==${PSYCOPG_VERSION} \n\
+	django-countries==${DJANGO_COUNTRIES_VERSION} \n\
+	django-request==${DJANGO_REQUEST_VERSION} \n\
+	xlwt==${XLWT_VERSION} \n\
+    	django-recaptcha2==1.4.1 \n\
+    	django-multi-captcha-admin==2.0.0" >> requirements-frontend-pip.txt \
+    && $HOME/worsica_web-py363_venv/bin/pip3 install --no-cache-dir -r requirements-frontend-pip.txt \
+    && mkdir worsica_web \
+#Install worsica-django-auth-oidc for worsica
+    && curl -L "https://drive.google.com/uc?export=download&id=1DAuDDKkvTiOQ_GJwo9AzLcZk3Rnefqdn" -o worsica-django-auth-oidc-0.6.1.zip \
+    && $HOME/worsica_web-py363_venv/bin/pip3 install worsica-django-auth-oidc-0.6.1.zip \
+    && rm -rf worsica-django-auth-oidc-0.6.1.zip \
+#Install dependencies to run functional tests (browsers)
+    && yum install -y firefox \
+    && cd /var/tmp \
+    && curl -O https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
+    && yum install -y google-chrome-stable_current_x86_64.rpm \
+    && rm -rf google-chrome-stable_current_x86_64.rpm \
+#Cleanup time
+    && yum clean all --enablerepo='*' \
+    && rm -rf /var/tmp/* \
+    && rm -rf /var/cache/* \
+    && rm -rf ~/.cache/*
+
+#set the path enviroment variable and the cwd
+ENV PATH /usr/local/worsica_web-py363_venv/bin:${PATH}
+WORKDIR /usr/local/worsica_web
+
+

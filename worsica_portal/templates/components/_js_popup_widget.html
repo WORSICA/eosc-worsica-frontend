@@ -1,0 +1,140 @@
+<style>
+	.ui-dialog {
+		background-color: #33363e !important;
+		border-color: #0CB5D4 !important;
+		border-radius: 10px;		
+		z-index: 1000 !important ;
+	}
+	.ui-dialog .ui-dialog-buttonset button {
+		border-color: #0CB5D4 !important;
+		border-radius: 20px;
+		background-color: transparent;
+		color: #ffffff !important;
+	}
+	.ui-dialog .ui-dialog-buttonpane {
+		background-color: #33363e !important;
+	}
+	.ui-dialog-titlebar {
+		background-image: linear-gradient(#1fbbd9,#65defa) !important;
+      	color: white !important;
+	}
+	.no-close .ui-dialog-titlebar-close {
+		display: none;
+	}
+	#dialog-message{
+		color: #ffffff !important;
+	}
+</style>
+
+<script>
+	var dm = null
+	// on window resize run function
+	rescaleRatio = 0.6
+	$(window).resize(function (e) {
+		//console.log(e.target)
+		if(e.target == window){
+		    console.log('resize dialog')
+		    windowIH = window.innerHeight*rescaleRatio
+			windowIW = window.innerWidth*rescaleRatio
+			//console.log(dm.dialog('option','resizable'))
+		    if(dm!=null && dm.dialog('option','resizable')){
+		    	dialogWidth = dm.dialog("option",'width')
+		    	dialogHeight = dm.dialog("option",'height')
+		    	var minDialogWidth = Math.min(dialogWidth, windowIW)
+				var minDialogHeight = Math.min(dialogHeight, windowIH)
+				console.log(minDialogWidth)
+				console.log(minDialogHeight)
+			    dm.dialog("option",'width', minDialogWidth)
+			    dm.dialog('option','height', minDialogHeight)
+		    }
+		}
+	});
+
+	function buildDynamicModalPopup(title, htmlText, buttonsList, wh, enableCloseBtn=false, isResizable=false, isDraggable=false){
+		//purge
+		dm=null
+		$('.ui-dialog').remove()
+		//
+		iconUrl = '/static/images/load.gif'
+		if (title.indexOf('Loading')>-1 || title.indexOf('Initializing')>-1 || htmlText.indexOf('wait')>-1){iconUrl = '/static/images/load.gif'}
+		else if (title.indexOf('Error')>-1){iconUrl = '/static/images/error2.svg'}
+		else if (title.indexOf('Warning')>-1){iconUrl = '/static/images/warning.svg'}
+		else if (title.indexOf('Information')>-1){iconUrl = '/static/images/info.svg'}
+		else if (title.indexOf('Success')>-1){iconUrl = '/static/images/success.svg'}
+		else if (htmlText.indexOf('?')>-1){iconUrl = '/static/images/interrogation.svg'}
+		tableHtml=
+			"<table>"+
+			"<tr>"+
+				"<td style='vertical-align:top;'>"+
+					"<img id='stateicon' height=50px src="+iconUrl+" style='margin-right:10px;margin-top:10px'/>"+
+				"</td>"+
+				"<td style='color:#ffffff !important'>"+htmlText+"</td>"+
+			"</tr>"+
+			"</table>"
+		buildDynamicModalPopup2(title, tableHtml, buttonsList, wh, enableCloseBtn, isResizable, isDraggable)
+	}
+	
+	function buildDynamicModalPopup2(title, htmlText, buttonsList, wh, enableCloseBtn=false, isResizable=false, isDraggable=false){
+		$( "#dialog-message" ).empty()
+		$( "#dialog-message" ).append(htmlText)
+		var buttons = []
+
+		windowIH = window.innerHeight*rescaleRatio
+		windowIW = window.innerWidth*rescaleRatio
+		
+		for (var b=0; b<buttonsList.length; b++){
+			buttons.push({text: buttonsList[b][0], click: buttonsList[b][1]})
+		}
+
+		w=wh[0]
+		h=wh[1]
+		opts = {
+			dialogClass: (enableCloseBtn==true? "" : "no-close"),
+		  	title: title, modal: true, draggable: isDraggable, resizable: isResizable, position: { my: 'top', at: 'top+100', of: window },
+		  	width: (w!=null? w : Math.min(890, windowIW)), height: (h!=null? h : Math.min(650, windowIH)), buttons: buttons,
+		  	open: function(){
+	            var closeBtn = $('.ui-dialog-titlebar-close');
+	            closeBtn.html("<span class='ui-button-icon-primary ui-icon ui-icon-closethick'></span>");
+	        },
+	        resizeStop: function( event, ui ) {
+	        	//console.log(ui.size)
+	        	/*dm.dialog("option",'width', ui.size.width)
+			    dm.dialog('option','height', ui.size.height)
+			    setTimeout(function(){
+			    	if (window.location.href.includes('/dashboard')) {
+				    	//if chart is not on a dashboard widget (today)
+				    	var loadedgraphs2 = $("#dialog-message").find(".graph")
+				    	for (var i = 0; i<loadedgraphs2.length; i++){
+				    		var width = ui.size.width*0.8;
+							var height = ui.size.height*0.8;
+							var index = $('#'+loadedgraphs2[i].id).data('highchartsChart');
+							var chart = Highcharts.charts[index];
+							chart.setSize(width, height)
+				    	}
+			    	}
+			    	else{
+			    		var loadedgraphs = $(".grid-stack .grid-stack-item-content").find(".graph")
+			    		for (var i = 0; i<loadedgraphs.length; i++){
+			    			resizeChart(loadedgraphs[i].id)
+			    		}
+			    		var loadedgraphs2 = $("#divDashboardPopup").find(".graph")
+				    	for (var i = 0; i<loadedgraphs2.length; i++){
+				    		var width = ui.size.width*0.8;
+							var height = ui.size.height*0.8;
+							var index = $('#'+loadedgraphs2[i].id).data('highchartsChart');
+							var chart = Highcharts.charts[index];
+							chart.setSize(width, height)
+				    	}
+			    	}
+			    	
+			    }, 500);*/
+	        }
+	    };
+		//console.log(opts)
+		dm = $( "#dialog-message" ).dialog(opts)
+	}
+</script>
+
+<div id="dialog-message">
+	<p></p>
+</div>

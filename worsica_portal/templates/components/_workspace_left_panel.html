@@ -1,0 +1,934 @@
+{% load staticfiles %}
+<style>
+	#leftPanel{
+		padding:10px 10px 90px 10px; 
+		width:480px; 
+		max-width:480px;
+		height: calc(100vh - 80px);
+		top:80px; 
+		position: absolute; 
+		left:-350px; 
+		background-color: #20222b; 
+		z-index:100;
+		overflow-y: hidden;
+		transition: left 0.2s linear;
+	}
+	#leftPanel .close{
+		color: #1fbbd9;
+		opacity: 1;
+	}
+	#leftPanel {
+		color: #ffffff;
+		width:100%
+	}
+	#leftPanel table {
+		color: #ffffff;
+		width:100%
+	}
+	#leftPanel #leftPanelTitle {
+		margin-top:20px;
+		margin-bottom:20px;
+	}
+	#leftPanel #leftPanelTitle #title {
+		text-align: left;
+		font: Bold 32px/38px Roboto;
+		letter-spacing: 0px;
+		color: #FFFFFF;
+	}
+	#leftPanel .leftPanelSubtitle {
+		text-align: left;
+		font: Lighter 32px/38px Roboto;
+		letter-spacing: 0px;
+		color: #0CB5D4;
+		opacity: 1;		
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+	#leftPanel #leftPanelContent {
+		overflow-y: auto;
+		height: 84%;
+		position: static;
+		/*scrollbar-color: #1fbbd9 #33363e;
+		scrollbar-width: thin;*/
+	}
+	/*#leftPanel #leftPanelContent::-webkit-scrollbar-thumb{ background-color: #1fbbd9; }
+    #leftPanel #leftPanelContent::-webkit-scrollbar-track{ background-color: #33363e; }*/
+
+	#leftPanel #leftPanelNextButton {
+		margin-top: 15px;
+		margin-bottom: 5px;
+		float: right;
+		margin-right: 15px;
+	}
+	.subaccordion {
+		font-size: 10pt;
+		padding-left:10px;
+		margin-left: 7px;
+		border-left: 1px solid rgba(12, 181, 212, 1);
+	}
+	.subaccordion.disabled {
+		border-left: 1px solid rgba(255, 255, 255, 1);
+	}
+	.btnPrevNext {
+		color: #fff; 
+		background-image: linear-gradient(180deg, #00B1D0 0%, #2CC0DE 71%, #6FE3FF 100%);
+		border-radius: 5px;
+		margin-left: 5px;
+	}
+	.btnPrevNext:hover {
+		color: #fff;
+		font-weight: bold;
+	}
+	.btnPrevNext.btnNext {
+		width: 265px;
+	}
+	.btnPrevNext.btnPrev {
+		width: 165px;
+	}
+
+
+	#separatorOr {
+		width: 91%; 
+		text-align: center; 
+		border-bottom: 1px solid #ffffff; 
+		line-height: 0.1em;
+		margin: 10px 10px 20px 20px; 
+	} 
+
+	#separatorOr b { 
+		background:#20222b; 
+		padding:0 10px; 
+	}
+	
+</style>
+<div id="leftPanel">
+	<div style='position:relative;'>
+	  	<div id='leftPanelTitle'>
+	  		<img class="close" width=25px src='/static/images/close@2x.png'/>
+	  		<b id='title'>Title</b>  		
+	  	</div>
+	  	<div id='leftPanelContent'>
+  			<div class='mydiv' id='div-step1ROI' style='display: none'>
+	  			<hr>
+				<label for="optCreate" class="leftPanelSubtitle" >Create a new RoI<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step1ROI")'/></label>
+				<hr>			
+				<div class="myaccordion" id="accordion1" style="position: relative;">					
+					<p style="font-weight:bold;"><span style="color:#1fbbd9; font-weight: bold" >1.</span> Give a name:</p>
+					<div class='custom-form-control' style='width:100%; padding-bottom:10px'>
+						<label for="roiName">Name</label>
+						<input class="form-control" type="text" id="roiName" style="text-align:right"></input>
+					</div>
+					<p style="font-weight:bold; padding-top:10px">Choose one of options below:</p>
+					<input class="form-check-input custom-radio" type="radio" id="optCreateFrom1" name="optCreateFrom" value="optCreateFrom1" checked>
+					<label for="optCreateFrom1">Draw rectangle</label>
+						<a id='iconDrawPolygon' onclick='onClickDrawRectangle()'><img height=32px src='/static/images/drawpolygon2.svg' title='Draw polygon' style='margin:3px'/></a><br>
+					<input class="form-check-input custom-radio" type="radio" id="optCreateFrom2" name="optCreateFrom" value="optCreateFrom2" disabled>
+					<label for="optCreateFrom2">Upload a CSV file<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step1ROI-create-uploadcsv")'/></label>
+						<div id='divuploadfile' class='subaccordion'>
+							<form style='font-size:10pt;display:inline' action='/portal/upload_roi_coords' method='post' enctype='multipart/form-data'>
+								{% csrf_token %}
+								<div class='custom-form-control-file'>
+								<div class='progress'>
+									<div class='progress-bar' style='width: 0%;background-color:#2CC0DE'></div>
+									<img id='upload_loading' style='display:none' height=16px src='/static/images/load.gif'/>
+								</div>
+								<input id='fileupload' name='myfile' type='file' accept='.csv,application/csv'>
+								</div>
+							</form>
+						</div>
+					<input class="form-check-input custom-radio" type="radio" id="optCreateFrom3" name="optCreateFrom" value="optCreateFrom3" disabled>
+					<label for="optCreateFrom3">Set coordinates</label><br>
+					<div id='roiCoords' class='subaccordion disabled'>
+						<p style="color:#1fbbd9;display:none">Area: <span id="roiArea">--</span> km2</p>
+						<div class='row'>
+							<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+								<label for="topLeftY">Lat max</label>
+								<input class="form-control" type="number" id="topLeftY" style="text-align:right" onkeypress="return isNumericKey(event)">
+							</div>
+						</div>						
+						<div class='row'>
+							<div class='col-md-6 custom-form-control' style="padding-right:5px; padding-top:10px; padding-bottom:10px">
+								<label for="bottomRightX">Lon min</label>
+								<input class="form-control" type="number" id="bottomRightX" style="text-align:right" onkeypress="return isNumericKey(event)">
+							</div>
+							<div class='col-md-6 custom-form-control' style="padding-left:5px; padding-top:10px; padding-bottom:10px">
+								<label for="topLeftX">Lon max</label>
+								<input class="form-control" type="number" id="topLeftX" style="text-align:right" onkeypress="return isNumericKey(event)">
+							</div>
+						</div>
+						<div class='row'>
+							<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+								<label for="bottomRightY">Lat min</label>
+								<input class="form-control" type="number" id="bottomRightY" style="text-align:right" onkeypress="return isNumericKey(event)">
+							</div>
+						</div>
+					</div>				
+				</div>
+				<div id='separatorOr'><b>Or</b></div>				
+				<div class="myaccordion" id="accordion2">
+					<p style="font-weight:bold"><span style="color:#1fbbd9">2.</span> Select an existing RoI</p>
+					<select id="selectROI" class="form-control" >
+					</select>
+				</div><hr>
+			</div>
+			<div class='mydiv' id='div-step2Inputs' style='display:none'>
+				<hr><p class="leftPanelSubtitle">Select Images<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step2Inputs")'/></p><hr>
+				<div class="myaccordion" id="accordion2" style="position: relative;">
+					<p style="font-weight:bold; padding-top:10px; padding-bottom:10px">{% if request.path != home_waterleak %}<span style="color:#1fbbd9; font-weight: bold" >1.</span>{% endif %} Choose one of options below:</p>
+					{% if request.path == home_inland %}
+					<!--<input class="form-check-input custom-radio" type="radio" id="optInput4" name="optInput" value="optInput4" disabled>
+					<label for="optInput4">TerraSAR-X</label><br>
+					<input class="form-check-input custom-radio" type="radio" id="optInput5" name="optInput" value="optInput5">
+					<label for="optInput5">Sentinel 1</label>
+					<div id='inputsSentinel1' class='subaccordion disabled'>
+						<p>Product Type</p>
+						<div id='inputsSentinel1PT' class='subaccordion disabled'>
+							<input class="form-check-input custom-checkbox" type="checkbox" id="optSentinel1-PT-GRD" name="optSentinel1-PT" value="optSentinel1-PT-GRD" checked disabled>
+							<label for="optSentinel1-PT-GRD">GRD (water detection)</label><br>
+						</div>
+						<p>Sensor Mode</p>
+						<div id='inputsSentinel1SM' class='subaccordion disabled'>
+							<input class="form-check-input custom-checkbox" type="checkbox" id="optSentinel1-SM-IW" name="optSentinel1-SM" value="optSentinel1-SM-IW" checked disabled>
+							<label for="optSentinel1-SM-IW">Interferometric Wide (IW)</label><br>
+							<input class="form-check-input custom-checkbox" type="checkbox" id="optSentinel1-SM-SM" name="optSentinel1-SM" value="optSentinel1-SM-SM" disabled>
+							<label for="optSentinel1-SM-SM">Swath Mode (SM) </label><br>
+						</div>
+					</div>-->
+					{% endif %}
+					<input class="form-check-input custom-radio" type="radio" id="optInput1" name="optInput" value="optInput1" checked>
+					<label for="optInput1" style="padding-top:20px; padding-bottom:0px">Sentinel 2</label>
+					<div id='inputsSentinel2' class='subaccordion'>
+						<table style='font-size: 13px;border-spacing: 5px;border-collapse: separate;'>
+							<tr>
+								<td><input class="form-check-input custom-checkbox" type="checkbox" id="optSentinel2-L1C" name="optSentinel2" value="optSentinel2-L1C"></td>
+								<td><label for="optSentinel2-L1C">Level 1C Products</label></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td><div style='width:100%'>
+										<input id="conversion-l1-l2" class="form-check-input custom-checkbox"  type="checkbox"></input>
+										<label for="conversion-l1-l2" style="display:inline;">Apply atmospheric correction on L1C imagesets.</label>
+									</div></td>
+							</tr>
+							<tr>
+								<td><input class="form-check-input custom-checkbox" type="checkbox" id="optSentinel2-L2A" name="optSentinel2" value="optSentinel2-L2A" checked></td>
+								<td><label for="optSentinel2-L2A">Level 2A Products</label></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td id='filter-cloud-cov-l2-div'>
+									<input id="filter-cloud-cov-l2" class="form-check-input custom-checkbox"  type="checkbox" checked></input>
+									<label for="filter-cloud-cov-l2" style="display:inline;">Filter search by Cloud Coverage</label>
+									<div class='custom-form-control' id="optSentinel2-cloud-cov-div" style='width:100%; margin-left:20px'>
+										<label for="optSentinel2-cloud-cov" style="display:inline;">Maximum Cloud Coverage (%)</label>
+										<input id="optSentinel2-cloud-cov" class="form-control" type="number" style="width:230px;padding-left:120px;text-align:right" value=10 min=0 max=100 onkeypress="return isNumericKey(event)"></input>
+									</div></td>
+							</tr>
+							
+						</table>
+					</div>
+					{% if request.path == home_waterleak %}
+					<input class="form-check-input custom-radio" type="radio" id="optInput2" name="optInput" value="optInput2" disabled>
+					<label for="optInput2" style="padding-top:20px; padding-bottom:0px">Pleiades</label>
+					<div id='inputsPleiades' class='subaccordion disabled'>
+						<!--<h5>Uploaded Pleiades files</h5>
+						<form id="uploadPleiades" action='...' method='post' enctype='multipart/form-data'>
+							{% csrf_token %}
+							<div id='progress'>
+								<div id='upload_error' style='display:none'></div>
+								<img id='upload_loading' style='display:none' height=16px src='{% static "/images/load.gif" %}'/>
+								<div class='bar' style='width: 0%;height: 16px;'>
+									<p id='textprogress' style='display:inline'>0%</p>
+								</div>
+							</div>
+							<input class="form-control-file" type="file" id='fileupload' name='myfile' accept="image/tif" disabled>
+							<button id='up_btn'>Upload</button>
+						</form>
+						<table id='listOfUploadedPleiadesImagesets' class='well well-sm'></table>-->
+					</div>
+					{% endif %}
+					{% if request.path != home_waterleak %}
+					<input class="form-check-input custom-radio" type="radio" id="optInput3" name="optInput" value="optInput3">
+					<label for="optInput3" style="padding-top:20px; padding-bottom:0px">Drone</label>
+					<div id='inputsDrone' class='subaccordion'>
+						
+					</div>
+					{% endif %}
+				</div>
+				<hr>
+				<div class="myaccordion" id="accordion1" style="position: relative;">
+					<p style="font-weight:bold; padding-top:10px; padding-bottom:10px"><span style="color:#1fbbd9">2.</span> 
+						{% if request.path == home_waterleak %} Image search period
+						{% else %}Monitoring period
+						{% endif %}
+					</p>
+					<div class='custom-form-control' style='width:48%;float:left'>
+						<label for="beginDate">Start date</label>
+						<input id="beginDate" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-01-01" style="padding-left:80px;text-align:right"/>
+					</div>
+					<div class='custom-form-control' style='width:48%;float:right'>
+						<label for="endDate">End date</label>
+						<input id="endDate" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-12-31" style="padding-left:80px;text-align:right"/>
+					</div>
+				</div>
+				<hr>
+			</div>
+			<div class='mydiv' id='div-step3InputsRevision' style='display:none'>
+				<hr><p class="leftPanelSubtitle">Image selection<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step3InputsRevision")'/></p>
+				{% if request.path == home_waterleak %}
+				<div id="waterleak-search" >					
+					<input class="form-check-input custom-radio" type="radio" id="optInputRevision1" name="optInputRevision" value="optInputRevision1" checked>
+					<label for="optInputRevision1" style="padding-top:20px; padding-bottom:0px">Use all images</label>
+					<br>
+					{% if request.path == home_waterleak %}
+					<div id="optSentinel2-warning" class="alert alert-warning" role="alert">
+					</div>
+					{% endif %}
+					<input class="form-check-input custom-radio" type="radio" id="optInputRevision2" name="optInputRevision" value="optInputRevision2">
+					<label for="optInputRevision2" style="padding-top:20px; padding-bottom:0px">Select period</label>
+					<br>
+					<div id="dateFilterList" style="position: relative;">
+						<div class='custom-form-control' style='width:45%;float:left'>
+							<label for="beginDateFilterList">From</label>
+							<input id="beginDateFilterList" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-01-01" style="padding-left:80px;text-align:right"/>
+						</div>
+						<div class='custom-form-control' style='width:45%;float:right'>
+							<label for="endDateFilterList">Until</label>
+							<input id="endDateFilterList" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-12-31" style="padding-left:80px;text-align:right"/>
+							
+						</div>
+						
+					</div>
+				</div>
+				{% endif %}
+				
+				<a id='iconSelectAll' onclick='onClickSelectAll()'><img height=40px src='/static/images/selectall.svg' title='Select all' style='margin:3px'/></a>
+				<a id='iconDeselectAll' onclick='onClickDeselectAll()'><img height=40px src='/static/images/deselectall.svg' title='Deselect all' style='margin:3px'/></a>
+				<a id='iconUpload' class='clickUploadImageset' onclick="onClickUserRepositoryUpload('imageset')"><img height="40px" src="/static/images/uploadfile2.svg"></a>
+				{% if request.path == home_waterleak %}				
+				<a id='iconSearch' onclick='onClickStep3InputsRevisionSearch()'><img height=40px src='/static/images/search.svg' title='Search' style='margin:3px'/></a>
+				{% endif %}
+				
+				<hr>	
+				<div class="myaccordion" id="accordion1">
+					<div>
+						<table id="listOfImagesets" style="font-size:11pt"></table>
+					</div>
+				</div>
+			</div>
+			<div class='mydiv' id='div-step4Detection' style='display:none'>
+				<hr><p class="leftPanelSubtitle">{%if request.path == home_waterleak %}Water Index Settings{% else %}Detection Settings{% endif %}<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection")'/></p><hr>
+				<div class="myaccordion" id="accordion1" style="position: relative;">
+					<p style="font-weight:bold; padding-top:20px; padding-bottom:0px"><span style="color:#1fbbd9">1.</span> Water Index</p>
+					<div class='subaccordion' id='step4Detection-waterindex'>
+						<!-- from now on, thresholds will be automatically calculated, no user input -->
+						<!-- set all auto threshold checkboxes active -->
+						<input name="waterindex-chkbox" id="ndwi" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="ndwi" style="display:inline;">NDWI <!--[Default threshold filtering: 0]--></label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-ndwi")'/>
+						<div class='subaccordion' id='ndwi-subaccordion' style='margin-top:10px;display:none'> 
+							<input name="ndwi-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="ndwi-threshold-auto-chkbox">Auto threshold</label>
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="ndwi-threshold">Threshold filtering</label>
+								<input id="ndwi-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<!--<br>
+						<input name="waterindex-chkbox" id="ndwi1" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="ndwi1" style="display:inline;">NDWI1 [Default threshold filtering: 0]</label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-ndwi1")'/>
+						<div class='subaccordion' id='ndwi1-subaccordion' style='margin-top:10px'>
+							<input name="ndwi1-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="ndwi1-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px'>
+								<label for="ndwi1-threshold">Threshold filtering</label>
+								<input id="ndwi1-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>
+						<input name="waterindex-chkbox" id="ndwi2" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="ndwi2" style="display:inline;">NDWI2 [Default threshold filtering: 0]</label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-ndwi2")'/>
+						<div class='subaccordion' id='ndwi2-subaccordion' style='margin-top:10px'>
+							<input name="ndwi2-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="ndwi2-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="ndwi2-threshold">Threshold filtering</label>
+								<input id="ndwi2-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>-->
+						<br>
+						<input name="waterindex-chkbox" id="mndwi" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="mndwi" style="display:inline;">MNDWI <!--[Default threshold filtering: 0]--></label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-mndwi")'/>
+						<div class='subaccordion' id='mndwi-subaccordion' style='margin-top:10px;display:none'>
+							<input name="mndwi-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="mndwi-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="mndwi-threshold">Threshold filtering</label>
+								<input id="mndwi-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>
+						<!--<input name="waterindex-chkbox" id="mndwi2" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="mndwi2" style="display:inline;">MNDWI2 [Default threshold filtering: 0]</label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-mndwi2")'/>
+						<div class='subaccordion' id='mndwi2-subaccordion' style='margin-top:10px'>
+							<input name="mndwi2-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="mndwi2-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="mndwi2-threshold">Threshold filtering</label>
+								<input id="mndwi2-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>-->
+						<!--<input name="waterindex-chkbox" id="ndfi" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="ndfi" style="display:inline;">NDFI [Default threshold filtering: 0]</label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-ndfi")'/>
+						<div class='subaccordion' id='ndfi-subaccordion' style='margin-top:10px'>
+							<input name="ndfi-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="ndfi-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="ndfi-threshold">Threshold filtering</label>
+								<input id="ndfi-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>
+						<input name="waterindex-chkbox" id="ndmi" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="ndmi" style="display:inline;">NDMI [Default threshold filtering: 0]</label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-ndmi")'/>
+						<div class='subaccordion' id='ndmi-subaccordion' style='margin-top:10px'>
+							<input name="ndmi-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="ndmi-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="ndmi-threshold">Threshold filtering</label>
+								<input id="ndmi-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>-->
+						<input name="waterindex-chkbox" id="awei" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="awei" style="display:inline;">AWEI <!--[Default threshold filtering: 0]--></label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-awei")'/>
+						<div class='subaccordion' id='awei-subaccordion' style='margin-top:10px;display:none'>
+							<input name="awei-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="awei-threshold-auto-chkbox">Auto threshold</label>
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="awei-threshold">Threshold filtering</label>
+								<input id="awei-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-10 max=10 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>
+						<input name="waterindex-chkbox" id="aweish" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="aweish" style="display:inline;">AWEISH <!--[Default threshold filtering: 0]--></label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-aweish")'/>
+						<div class='subaccordion' id='aweish-subaccordion' style='margin-top:10px;display:none'>
+							<input name="aweish-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox" checked></input>
+							<label for="aweish-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="aweish-threshold">Threshold filtering</label>
+								<input id="aweish-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>
+						<!--<input name="waterindex-chkbox" id="wri" class="form-check-input custom-checkbox" type="checkbox"></input>
+						<label for="wri" style="display:inline;">WRI [Default threshold filtering: 0]</label>
+						<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4Detection-wri")'/>
+							<div class='subaccordion' id='wri-subaccordion' style='margin-top:10px'>
+							<input name="wri-threshold-auto-chkbox" class="form-check-input custom-checkbox" type="checkbox"></input>
+							<label for="wri-threshold-auto-chkbox">Auto threshold</label> 
+							<div class='custom-form-control' style='width:200px;'>
+								<label for="wri-threshold">Threshold filtering</label>
+								<input id="wri-threshold" class="form-control" type="number" style="display:inline;padding-left:120px;text-align:right" value=0 min=-1 max=1 step='0.1' onkeypress="return isNumericKey(event)"></input>
+							</div>
+						</div>
+						<br>-->
+					</div>
+					<br>
+					<!--<p style="font-weight:bold; padding-top:20px; padding-bottom:0px"><span style="color:#1fbbd9">2.</span> KMeans</p>-->
+					<div class='custom-form-control' style='width:260px;margin-left:18px;display:none'>
+						<label for="kmeans-clusters">Number of clusters</label>
+						<input id="kmeans-clusters" class="form-control" type="number" style="display:inline;padding-left:180px;text-align:right" value=5 min=1 max=10 onkeypress="return isNumericKey(event)"></input>
+					</div>
+					<!--<p style="font-weight:bold; padding-top:20px; padding-bottom:0px"><span style="color:#1fbbd9">3.</span> Filtering</p>-->
+					<div class='custom-form-control' style='width:260px;margin-left:18px;display:none'>
+						<label for="topography-depth">Topography threshold (m)</label>
+						<input id="topography-depth" class="form-control" type="number" style="display:inline;padding-left:180px;text-align:right" value=10 min=1 onkeypress="return isNumericKey(event)"></input>
+					</div>
+					<div class='custom-form-control' style='width:260px;margin-left:18px;display:none'>
+						<label for="bathymetry-depth">Bathymetry threshold (m)</label>
+						<input id="bathymetry-depth" class="form-control" type="number" style="display:inline;padding-left:180px;text-align:right" value=-10 max=-1 onkeypress="return isNumericKey(event)"></input>
+					</div>
+				</div>
+				
+			</div>
+			{% if request.path == home_coastal %}<!-- Coastal -->
+			<!--<div class='mydiv' id='div-step5OCConnection' style='display:none'>
+				<hr><p class="leftPanelSubtitle">Configuration</p><hr>
+				<div class="myaccordion" id="accordion1" style="position:relative;">
+					<input class="form-check-input custom-checkbox" type="checkbox" id="step5OCConnection-enable" name="step5OCConnection-chkbox" value="step5OCConnection-enable" checked>
+					<label for="step5OCConnection-enable">OPENCoastS Forecast Connection</label>
+					<div class='subaccordion' id='step5OCConnection-options'>
+						<input class="form-check-input custom-radio" type="radio" id="optOCConfig1" name="optOCConfig" value="optOCConfig1" checked>
+						<label for="optOCConfig1">Find automatically the adequate public deployment for the RoI</label><br>
+						<input class="form-check-input custom-radio" type="radio" id="optOCConfig2" name="optOCConfig" value="optOCConfig2">
+						<label for="optOCConfig2">Use from a deployment</label>
+						<div class='custom-form-control' style='width:220px;margin-left:18px'>
+							<label for="oc-deployment-id">Deployment ID</label>
+							<input id="oc-deployment-id" class="form-control" min=1 val=1 type="number" style="display:inline;padding-left:180px;text-align:right" onkeypress="return isNumericKey(event)" style="display:inline;width:70px" disabled></input>
+						</div>
+					</div>
+				</div>
+			</div>-->
+			{% endif %}
+			<div class='mydiv' id='div-step6Run' style='display: none'>
+				<hr><p class="leftPanelSubtitle" id="subtitle-name">Name</p><hr>
+				<div class="myaccordion" id="accordion1" style="position: relative;">
+					<div class='custom-form-control' style='width:100%'>
+						<label for="simulationName">Name</label>
+						<input class="form-control" type="text" id="simulationName" style="text-align:right"></input>
+					</div>
+				</div>
+				<hr><p class="leftPanelSubtitle">Summary<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step6Run")'/>
+				</p><hr>
+				<div class="myaccordion" id="accordion2">
+					<b><span style="color:#1fbbd9">1.</span>Region of Interest</b><br>
+					<b style='display:inline'>Name: </b><p style='display:inline' id='roiName'>?</p><br>
+					<b style='display:inline'>Extent: </b><p style='display:inline' id='roiExtent'>?</p><br>
+					<br>
+					<b><span style="color:#1fbbd9">2.</span>Inputs</b><br>
+					<b style='display:inline'>Image Type/Service Levels: </b><p style='display:inline' id='inputImageType'>?</p><br>
+					<b style='display:inline'>{%if request.path == home_waterleak %}Period{% else %}Monitoring period{% endif %}:</b><p style='display:inline' id='inputMonitoringPeriod'>?</p><br>
+					<br>
+					<b><span style="color:#1fbbd9">3.</span>{%if request.path == home_waterleak %}Water Index Settings{% else %}Detection Settings{% endif %}</b><br>
+					<b style='display:inline'>Water Index: </b><p style='display:inline' id='detectionWaterIdx'>?</p><br>
+					<!--<b style='display:inline'>Water Index threshold: </b><p style='display:inline' id='detectionWIThreshold'>?</p><br>-->
+					<!--<b style='display:none'>KMeans clusters (number): </b><p style='display:none' id='detectionKmeans'>?</p><br>
+					<b style='display:none'>Topography threshold (m): </b><p style='display:none' id='detectionTopoValue'>?</p><br>
+					<b style='display:none'>Bathymetry threshold (m): </b><p style='display:none' id='detectionBathValue'>?</p><br>
+					-->
+					<br>
+					<b><span style="color:#1fbbd9">4.</span>Input revision</b><br>
+					<b>Chosen imagesets: </b>
+					<table id='inputRevisionList' style='font-size:10pt'>
+						<tr><td>?</td></tr>
+					</table><br>
+					<br>
+					
+					{% if request.path == home_coastal %}<!-- Coastal -->
+					<!--<b><span style="color:#1fbbd9">5.</span>OPENCoastS</b><br>
+					<p style='display:inline' id='ocConfig'>?</p><br>-->
+					{% endif %}
+				</div>
+			</div>
+			<!-- PHASE 2 LEAK DETECTION -->
+			<div class='mydiv' id='div-step0DetectionSelection' style='display:none'>
+				<hr><p class="leftPanelSubtitle">Detection<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step0DetectionSelection")'/></p><hr>
+				<input class="form-check-input custom-radio" type="radio" id="optDetectionSelection1" name="optDetectionSelection" value="optDetectionSelection1" checked>
+				<label for="optDetectionSelection1">Create new leak configuration</label><br>
+				<input class="form-check-input custom-radio" type="radio" id="optDetectionSelection2" name="optDetectionSelection" value="optDetectionSelection2">
+				<label for="optDetectionSelection2">Edit ongoing leak configuration</label>
+				<select id="select-ld-listOfDetection" class="form-control">							
+				</select>						
+			</div>
+			<div class='mydiv' id='div-step1ImageSelection' style='display:none'>
+				<hr><p class="leftPanelSubtitle">Image selection<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step1ImageSelection")'/></p><hr>
+				<div class="myaccordion" id="accordion1" style="position: relative;">
+					<p style="font-weight:bold"><span style="color:#1fbbd9">1.</span> Select RoI</p>
+					<div class="myaccordion" id="accordion1ROI" style="position: relative;">
+						<!--<p>Please choose the RoI</p>-->
+						<select id="select-ld-listOfROI" class="form-control" onchange="onChangeStep1ImageSelectionOptions('roi')">
+							
+						</select>
+						<!--<div id='div-ld-listOfROI'>
+							<table id="ld-listOfROI">
+
+							</table>
+						</div>-->
+					</div>
+					<p style="font-weight:bold"><span style="color:#1fbbd9">2.</span> Select Climatology Processing (only the finished)</p>
+					<div class="myaccordion" id="accordion1Simulation" style="position: relative;">
+						<select id="select-ld-listOfSimulation" class="form-control" onchange="onChangeStep1ImageSelectionOptions('simulation')">
+
+						</select>
+					</div>
+					<p style="font-weight:bold"><span style="color:#1fbbd9">3.</span> Select Image source</p>
+					<div class="myaccordion" id="accordion1ImageSource" style="position: relative;">
+						<!--<p><span style="color:#1fbbd9">3.1.</span> Select the period</p>-->
+						<div id="dateLDFilterList" style="position: relative;">
+							<div class='custom-form-control' style='width:45%;float:left'>
+								<label for="beginDateLDFilterList">From</label>
+								<input id="beginDateLDFilterList" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-01-01" style="padding-left:80px;text-align:right"/>
+							</div>
+							<div class='custom-form-control' style='width:45%;float:right'>
+								<label for="endDateLDFilterList">Until</label>
+								<input id="endDateLDFilterList" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-12-31" style="padding-left:80px;text-align:right"/>
+							</div>
+						</div>
+						<a id='iconSearch' onclick='onClickStep1ImageSelectionSearch()'><img height=40px src='/static/images/search.svg' title='Search' style='margin:3px'/></a>
+				
+						<!--<i>Falta disponibilizar as imagens disponiveis da ESA nesta tabela. Aqui deveriam aparecer agregadas por data.</i>-->
+						<!--<p><span style="color:#1fbbd9">3.2.</span> Select the image</p>-->
+						<div id='div-ld-listOfImageset' style="position: relative;">
+							<table id="ld-listOfImageset"> 
+
+							</table>
+						</div>
+					</div>
+					<p style="font-weight:bold"><span style="color:#1fbbd9">4.</span> Select Index</p>
+					<div class="myaccordion" id="accordion1" style="position: relative;">
+						<!--<p>Please choose the water index</p>-->
+						<select id="select-ld-listOfWI" class="form-control" >
+							<option value='ndwi'>NDWI</option>
+							<option value='mndwi'>MNDWI</option>
+							<!--<option value='mndwi2'>MNDWI2</option>-->
+							<option value='awei'>AWEI</option>
+							<option value='aweish'>AWEISH</option>
+						</select>
+					</div>
+					<p style="font-weight:bold"><span style="color:#1fbbd9">5.</span> Select source of leak process</p>
+					<div class="myaccordion" id="accordion1" style="position: relative;">
+						<!--<p>Please choose the source of leak process</p>-->
+						<!--<select id="select-ld-listOfLeakDetection" class="form-control" >
+							<option value='by_index'>By index</option>
+							<option value='by_anomaly'>By anomaly</option>
+						</select>-->
+						<div id='div-ld-listOfLeakDetection'>
+							<table id="ld-listOfLeakDetection"> 
+								<tr>
+									<th><input class="form-check-input custom-radio" type="radio" id="by_index" name="optLeakDetectionType" value="by_index" checked></input></th>
+									<th>From index</th>
+								</tr>
+								<tr>
+									<th><input class="form-check-input custom-radio" type="radio" id="by_anomaly" name="optLeakDetectionType" value="by_anomaly"></input></th>
+									<th>From anomaly</th>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<p style="font-weight:bold"><span style="color:#1fbbd9">6.</span> Give a name</p>					
+					<div class="myaccordion" id="accordion1" style="position: relative;">
+						<div class='custom-form-control' style='width:100%'>
+							<label for="leakDetectionName">Name</label>
+							<input class="form-control" type="text" id="leakDetectionName" style="text-align:right"></input>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--<div class='mydiv' id='div-step2LeakDetection' style='display:none'>
+				<hr><p class="leftPanelSubtitle">Calculate Anomaly<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step2LeakDetection")'/></p><hr>
+				<div class="myaccordion" id="accordion1" style="position: relative;">
+				</div>
+			</div>-->
+			<div><hr>
+				<table id='showStateLeakDetection' style='display:none'>
+					<tr>
+						<td style='width:85%;font-size:10pt'>
+							<b>LEAK DETECTION</b><br>
+							Name: <p id='ld_name' style='display:inline'>???</p><br>
+							ROI/Proc. Climatology: <p id='ld_roi' style='display:inline'>???</p>/<p id='ld_simulation'  style='display:inline'>???</p><br>
+							Index/Source leak process: <p id='ld_index' style='display:inline'>???</p>/<p id='ld_leak_proc' style='display:inline'>???</p><br>
+							Processing state: <b id='ld_proc_state' style='display:inline'>???</b><img id='ld_loading' height=25px style='display:none' src='/static/images/load.gif'/>
+							<!--<div class='progress' style='height:10px;background-color:#33363e;margin-bottom:3px;margin-right:10px;margin-top:3px;'>
+								<div id=ld_progress class='progress-bar' style='display:inline;width:0%;background-color:#2CC0DE'></div>
+							</div>-->
+						</td>
+						<td style='width:15%'>
+							<img id='ld_state' height=60px  style='margin-left:10px' src='/static/images/unknown.svg' title='Not run'/>
+						</td>
+					</tr>
+					<tr>
+						<td style='font-size:10pt'>
+							<table id='showListProductsLeakDetection'></table>
+						</td>
+					</tr>
+				</table>
+			
+				<div class='mydiv' id='div-step3LeakDetection' style='display:none'>
+					<hr><p class="leftPanelSubtitle">Pipe network<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step3LeakDetection")'/></p><hr>
+					<div class="myaccordion" style="position: relative;">
+						<div class="myaccordion" id="accordion1" style="position: relative;">
+							<p id='step3LeakDetection-isrunning' class="alert alert-warning" style="display:none">You are not able to select pipe network and mask for the next step until the processing finishes determinating the 2nd derivative.</p>
+						
+							<p style="font-weight:bold"><span style="color:#1fbbd9">1.</span> Pipe network selection</p>
+							<input class="form-check-input custom-radio" type="radio" id="optStep3LeakDetectionPipeNetwork3" name="optStep3LeakDetectionPipeNetwork" value="optStep3LeakDetectionPipeNetwork3" checked>
+							<label for="optStep3LeakDetectionPipeNetwork3" style="padding-top:20px; padding-bottom:0px">No pipe network</label><br>
+							<input class="form-check-input custom-radio" type="radio" id="optStep3LeakDetectionPipeNetwork1" name="optStep3LeakDetectionPipeNetwork" value="optStep3LeakDetectionPipeNetwork1">
+							<label for="optStep3LeakDetectionPipeNetwork1" style="padding-top:20px; padding-bottom:0px">Upload a new pipe network</label>
+							<div class='subaccordion' id="divuploadgeometry">
+								<p>Select a ZIP file to upload. Worsica will automatically upload it. The zip file must contain the mandatory file extensions needed for loading: .shp, .shx and .dbf. </p>
+								<p>Other files are optional .prj, .xml, .sbn and .sbx. </p>
+								<form style='font-size:10pt;display:inline' action='/portal/proxy/intermediate/user_repository/waterleak/geometries/upload' method='post' enctype='multipart/form-data'>
+									{% csrf_token %}
+									<div class='custom-form-control-file'>
+									<div class='progress'>
+										<div class='progress-bar' style='width: 0%;background-color:#2CC0DE'></div>
+										<!--<img id='upload_loading' style='display:none' height=16px src='/static/images/load.gif'/>-->
+									</div>
+									<input id='fileupload2' name='myfile' type='file' accept='.zip,application/zip'>
+									<p style='display:none' id='_store_pipe_network_id'></p>
+									</div>
+									<div id='status_message'></div>
+								</form>
+							</div><br>
+							<input class="form-check-input custom-radio" type="radio" id="optStep3LeakDetectionPipeNetwork2" name="optStep3LeakDetectionPipeNetwork" value="optStep3LeakDetectionPipeNetwork2">
+							<label for="optStep3LeakDetectionPipeNetwork2" style="padding-top:20px; padding-bottom:0px">Existing pipe network from user repository</label>
+							<div class='subaccordion' id='listOfUploadedGeometries_subaccordion' style='width: 280px; padding-top: 10px;'>								
+								<!--<p>Select the pipe network</p>-->
+								<table id="listOfUploadedGeometries" style='font-size:10pt; margin-bottom: 10px; width:357px'>
+									
+								</table>
+							</div><br>
+						</div>
+
+						<div class="myaccordion" id="accordion2" style="position: relative;">
+							<p style="font-weight:bold"><span style="color:#1fbbd9">2.</span> Mask selection</p>
+							<input class="form-check-input custom-radio" type="radio" id="optStep3LeakDetectionMask2" name="optStep3LeakDetectionMask" value="optStep3LeakDetectionMask2" checked>
+							<label for="optStep3LeakDetectionMask2" style="padding-top:20px; padding-bottom:0px">No mask</label><br>
+							<input class="form-check-input custom-radio" type="radio" id="optStep3LeakDetectionMask1" name="optStep3LeakDetectionMask" value="optStep3LeakDetectionMask1">
+							<label for="optStep3LeakDetectionMask1" style="padding-top:20px; padding-bottom:0px">Define mask width (around pipe network)</label>
+							<div class='custom-form-control' style='width:100%'>
+								<label for="optStep3LeakDetectionMask1-width">Width in meters</label>
+								<input class="form-control" type="text" id="optStep3LeakDetectionMask1-width" style="text-align:right" value=10 min=1 max=50 onkeypress="return isNumericKey(event)"></input>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+				<div class='mydiv' id='div-step4LeakDetection' style='display:none'>
+					<hr><p class="leftPanelSubtitle">Identify Leaks<img height=20px src='/static/images/info.svg' title='Information' style='margin-left:25px' onclick='onClickInfoButton("step4LeakDetection")'/></p><hr>
+					<div class="myaccordion" id="accordion1" style="position: relative;">
+						<p id='step4LeakDetection-isrunning' class="alert alert-warning" style="display:none">You are not able to save leak points until the processing finishes identifying possible leaks.</p>
+						<p style="font-weight:bold"><span style="color:#1fbbd9">LIST OF SAVED SETS OF LEAK POINTS</span></p>
+						<p id='div-ld-listOfSavedLPs-error' style='display:none'></p>
+						<div id='div-ld-listOfSavedLPs'>
+							<table id='ld-listOfSavedLPs' style='font-size:10pt; margin-bottom: 10px;'>
+							</table>
+						</div>
+						<br>
+						<div class='well well-sm' style='font-size:9pt'>
+							<p style="font-weight:bold"><span style="color:#1fbbd9">SAVE A SET OF LEAK POINTS</span></p>
+							<p style="font-weight:bold"><span style="color:#1fbbd9">1.</span> Number of leak points</p>
+							<div class='custom-form-control' style='width:100%'>
+								<label for="numberLeakPoints">Number</label>
+								<input class="form-control" type="text" id="numberLeakPoints" style="text-align:right" value=35 min=1 max=10000 onkeypress="return isNumericKey(event)"></input>
+							</div><br>
+							<p style="font-weight:bold"><span style="color:#1fbbd9">2.</span> View leak points</p>
+							<a id='step4LeakDetectionView' onclick='onClickStep4LeakDetectionViewLeakPoints()' class='btn btn-small btnPrevNext'>View</a>
+							<br>
+							<p style="font-weight:bold"><span style="color:#1fbbd9">3.</span> Give a name to save</p>
+							<div class='custom-form-control' style='width:100%'>
+								<label for="nameLeakPoints">Name</label>
+								<input class="form-control" type="text" id="nameLeakPoints" style="text-align:right"></input>
+							</div><br>	
+							<a id='step4LeakDetectionSave' onclick='onClickStep4LeakDetectionSaveLeakPoints()' class='btn btn-small btnPrevNext'>Save</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id='leftPanelNextButton'>
+			<a id='bprev' onclick="onClickPrevious()" class="btn btn-lg btnPrevNext btnPrev"> 
+				<img width=12px src='/static/images/arrows_inv@2x.png'/> 
+				<span id='textPrev'>Previous</span> 
+			</a>
+			<a id='bnext' onclick="onClickNext()" class="btn btn-lg btnPrevNext btnNext">
+				<span id='textNext'>Next</span> 
+				<img width=12px src='/static/images/arrows@2x.png'/> 
+			</a>
+		</div>
+  	</div>
+	
+</div>
+
+<script>
+	var step1chosenOpt = 'optSelect'
+	var intervalListOfLDDetails = null
+
+	function closeLeftPanel(){
+		$('#leftPanel').css('left', -480);
+	}
+	function openLeftPanel(){
+		$('#leftPanel').css('left', 0);
+	}
+
+	function _clear_interval_leak_detection_details(){
+		if (intervalListOfLDDetails!=null){
+			//console.log('clearInterval updateListOfLDDetails')
+			clearInterval(intervalListOfLDDetails)
+			intervalListOfLDDetails = null
+		}
+	}
+	function _start_interval_leak_detection_details(roi_id, sim_id, ld_id){
+		_clear_interval_leak_detection_details()
+		updateListOfLDDetails(roi_id, sim_id, ld_id)
+		intervalListOfLDDetails = setInterval(function(){
+			//console.log('setInterval updateListOfLDDetails')		
+			updateListOfLDDetails(roi_id, sim_id, ld_id)
+		}, 5000)
+	}
+
+	function _lock_unlock_options_step3_step4_ld(step, state){
+		_unlock_options_by_state = {
+			'step3LeakDetection':['stored-calculated-leak','stored-determinated-leak','error-storing-determinated-leak','error-generating-mask-leak','error-determinating-leak'],
+			'step4LeakDetection':['stored-determinated-leak','error-storing-determinated-leak','error-generating-mask-leak','error-determinating-leak']
+		}
+		is_unlocked = (_unlock_options_by_state[step].indexOf(state)>-1)
+		//console.log(step, state)
+		//console.log('is_unlocked?')
+		//console.log(is_unlocked)
+		if (step == 'step3LeakDetection'){
+			if (is_unlocked){
+				$('#div-step3LeakDetection #accordion1 input[name="optStep3LeakDetectionPipeNetwork"]').attr('disabled',false)
+				$('#div-step3LeakDetection #accordion2 input[name="optStep3LeakDetectionMask"]').attr('disabled',false)
+				$('#leftPanelNextButton #bprev').attr('disabled',false)
+				$('#leftPanelNextButton #bnext').attr('disabled',false)
+				$('#div-step3LeakDetection #step3LeakDetection-isrunning').hide()
+			}
+			else{
+				$('#div-step3LeakDetection #accordion1 input[name="optStep3LeakDetectionPipeNetwork"]').attr('disabled',true)
+				$('#div-step3LeakDetection #accordion2 input[name="optStep3LeakDetectionMask"]').attr('disabled',true)
+				$('#leftPanelNextButton #bprev').attr('disabled',false)
+				$('#leftPanelNextButton #bnext').attr('disabled',true)
+				$('#div-step3LeakDetection #step3LeakDetection-isrunning').show()
+			}
+		}
+		else if (step == 'step4LeakDetection'){
+			if (is_unlocked){
+				$('#div-step4LeakDetection #numberLeakPoints').attr('disabled',false)
+				$('#div-step4LeakDetection #step4LeakDetectionView').attr('disabled',false)
+				$('#div-step4LeakDetection #step4LeakDetectionSave').attr('disabled',false)
+				$('#leftPanelNextButton #bprev').attr('disabled',false)
+				$('#leftPanelNextButton #bnext').attr('disabled',false)
+				$('#div-step4LeakDetection #step4LeakDetection-isrunning').hide()
+			}
+			else{
+				//lock the save leak points
+				$('#div-step4LeakDetection #numberLeakPoints').attr('disabled',true)
+				$('#div-step4LeakDetection #step4LeakDetectionView').attr('disabled',true)
+				$('#div-step4LeakDetection #step4LeakDetectionSave').attr('disabled',true)
+				$('#leftPanelNextButton #bprev').attr('disabled',true)
+				$('#leftPanelNextButton #bnext').attr('disabled',true)
+				$('#div-step4LeakDetection #step4LeakDetection-isrunning').show()
+			}
+		}
+	}
+
+	function updateListOfLDDetails(roi_id, sim_id, ld_id){
+		_url = '/portal/waterleak/leakdetection/rois/'+roi_id+'/simulations/'+sim_id+'/leak_detections/'+ld_id
+		$.ajax({ type: "GET", url: _url, async: true,
+		     success : function(response){
+				jsonLDDetails = $.parseJSON(JSON.stringify(response));
+				//console.log(jsonLDDetails)
+				if (jsonLDDetails.length==0){
+					$('#showStateLeakDetection #ld_name').text("[Error: no leak detection found]")
+					$('#showStateLeakDetection #ld_roi').text("[Error: no leak detection found]")
+					$('#showStateLeakDetection #ld_simulation').text("[Error: no leak detection found]")
+					$('#showStateLeakDetection #ld_index').text("[Error: no leak detection found]")
+					$('#showStateLeakDetection #ld_leak_proc').text("[Error: no leak detection found]")
+					//_set_progress_scale_by_state_leak("#showStateLeakDetection #ld_progress", 'unknown', 0, 3)
+					_set_color_state_leak("#showStateLeakDetection", 'unknown')
+					$('#showStateLeakDetection #showListProductsLeakDetection').empty()
+					_lock_unlock_options_step3_step4_ld(curr_step, 'unknown')
+						
+				}
+				else{
+					if (jsonLDDetails['alert'] != 'error'){	//loaded
+						$('#showStateLeakDetection #ld_name').text(jsonLDDetails['leak_detection']['name'])
+						$('#showStateLeakDetection #ld_roi').text(jsonLDDetails['leak_detection']['aos_name'])
+						$('#showStateLeakDetection #ld_simulation').text(jsonLDDetails['leak_detection']['job_submission_name'])
+						$('#showStateLeakDetection #ld_index').text(jsonLDDetails['leak_detection']['indexType'])
+						$('#showStateLeakDetection #ld_leak_proc').text(jsonLDDetails['leak_detection']['start_processing_second_deriv_from'])
+						//_set_progress_scale_by_state_leak("#showStateLeakDetection #ld_progress", jsonLDDetails['leak_detection']['state'], 0, 3)
+						_set_color_state_leak("#showStateLeakDetection", jsonLDDetails['leak_detection']['state'])
+						//load list
+						_lock_unlock_options_step3_step4_ld(curr_step, jsonLDDetails['leak_detection']['state'])
+						
+					}
+					else{
+						$('#showStateLeakDetection #ld_name').text("[Error loading]")
+						$('#showStateLeakDetection #ld_roi').text("[Error loading]")
+						$('#showStateLeakDetection #ld_simulation').text("[Error loading]")
+						$('#showStateLeakDetection #ld_index').text("[Error loading]")
+						$('#showStateLeakDetection #ld_leak_proc').text("[Error loading]")
+						//_set_progress_scale_by_state_leak("#showStateLeakDetection #ld_progress", 'unknown', 0, 3)
+						_set_color_state_leak("#showStateLeakDetection", 'unknown')
+						$('#showStateLeakDetection #showListProductsLeakDetection').empty()
+						_lock_unlock_options_step3_step4_ld(curr_step, 'unknown')
+						
+					}
+				}
+			},
+		    error: function(response){
+				$('#showStateLeakDetection #ld_name').text("[Error loading]")
+				$('#showStateLeakDetection #ld_roi').text("[Error loading]")
+				$('#showStateLeakDetection #ld_simulation').text("[Error loading]")
+				$('#showStateLeakDetection #ld_index').text("[Error loading]")
+				$('#showStateLeakDetection #ld_leak_proc').text("[Error loading]")
+				//_set_progress_scale_by_state_leak("#showStateLeakDetection #ld_progress", 'unknown', 0, 3)
+				_set_color_state_leak("#showStateLeakDetection", 'unknown')
+				$('#showStateLeakDetection #showListProductsLeakDetection').empty()
+				_lock_unlock_options_step3_step4_ld(curr_step, 'unknown')
+		    }
+		});	
+	}
+
+	function cleanupLeftPanel(){
+		closeLeftPanel()
+		//
+		disableDrawPolygonMode()
+		$('#leftPanelContent div[class="mydiv"]').each(function(){
+			$(this).hide()
+		})
+		_hideAllROI()
+	}
+
+	function _showPopupWarningClickYes(){
+		cleanupLeftPanel()
+		createFreshBlobJsonSimulation()
+		//
+		$('#step-ph1').removeClass('current')
+		$('#step-ph1-workflow').hide()
+		restartStep('step1ROI')
+		restartStep('step2Inputs')
+		restartStep('step3InputsRevision')
+		restartStep('step4Detection')
+		//{% if request.path == home_coastal %}
+		//restartStep('step5OCConnection')
+		//{% endif %}
+		restartStep('step6Run')
+		//
+		$('#step-ph2').removeClass('current')
+		$('#step-ph2-workflow').hide()
+		restartStep('step1ImageSelection')
+		restartStep('step2LeakDetection')
+		_clear_interval_leak_detection_details()
+
+		$('#'+curr_step).removeClass('done').removeClass('current')
+		$('#step1ROI').removeClass('done').addClass('current')
+		$('#step0DetectionSelection').removeClass('done').addClass('current')
+		curr_step = 'step1ROI'
+		if (LEFT_PANEL_MODE != null){ 
+			LEFT_PANEL_MODE = null
+			EDIT_SIMULATION_ID = null
+			EDIT_LEAK_DETECTION_ID = null
+			//WATERLEAK_SIMULATION_EXISTS = false
+		}
+	}
+
+	$('#leftPanelTitle .close').click(function(e){
+		buildDynamicModalPopup('Warning!', 
+			'<p>You are '+(LEFT_PANEL_MODE == 'waterleak-create-leak-detection'?'managing a leak detection': (LEFT_PANEL_MODE == 'edit'?'editing an existing simulation': 'creating a new simulation'))+'. Closing this will lose any changes you have done on the workflow. Continue?</p>', 
+			[['Yes', function(){ 
+				$(this).dialog( "close" )
+				_showPopupWarningClickYes()
+				$('#leftPanelContent .close').toggleClass('closed');
+			 }],
+			 ['No', function(){
+			 	//cleanupLeftPanel() 
+			 	$(this).dialog( "close" )
+			 	//$('.close').toggleClass('closed');
+			 }]], [300,220])	    
+	});
+
+</script>

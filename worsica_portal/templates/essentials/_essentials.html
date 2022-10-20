@@ -1,0 +1,225 @@
+{% load staticfiles %}
+<script src="{% static 'scripts/jquery-2.2.4.js' %}"></script>
+<script src="{% static 'scripts/jquery-ui.js' %}"></script>
+<script src="{% static 'scripts/bootstrap.min.js' %}"></script>
+<script src="{% static 'scripts/jquery.datetimepicker.full.js' %}"></script>
+<script src="{% static 'scripts/worsica-arrow-stepbar.js' %}"></script>
+<script src="{% static 'scripts/jquery.fileupload.js' %}"></script>
+<script src="{% static 'scripts/worsica-highcharts-widgets.js' %}"></script>
+
+
+<script src="{% static 'scripts/highcharts-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-exporting-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-offline-exporting-9.3.1.js' %}"></script>
+<!--<script src="{% static 'scripts/highcharts-more-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-map-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-contour-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-delaunay-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-vector-9.3.1.js' %}"></script>
+<script src="{% static 'scripts/highcharts-no-data-to-display-9.3.1.js' %}"></script>-->
+<script src="{% static 'scripts/highcharts-boost-9.3.1.js' %}"></script>
+
+<link rel="icon" type="image/png" href="{% static 'images/favicon.ico' %}"> 
+<link rel="stylesheet" href="{% static 'styles/jquery-ui.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'styles/bootstrap.min.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'styles/jquery.datetimepicker.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'styles/worsica-arrow-stepbar.css' %}" type="text/css" />
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+
+<style>
+	body {
+		color: #252525 !important;
+		background-color: #f8f8f8 !important;
+		overflow: hidden;
+		font-family: 'Roboto', sans-serif;
+	}
+	.btn {
+		border-color: #2c3239 !important;
+		border-radius: 1px;
+	}
+	.btn-default {
+		background-color: transparent;
+		color: #3498CE !important;
+	}
+	.form-control {
+		/*border-color: #2c3239 !important;*/
+		/*background-color: transparent;*/
+		color: #00579d !important;
+		/*border-radius: 4px;*/
+		border: 1px solid #707070;
+		border-radius: 5px;
+		opacity: 1;
+	}
+	.well {
+		border-color: #2c3239 !important;
+		background-color: transparent;
+		border-radius: 4px;
+	}	
+
+	.bgImage {
+		padding: 80 40 80 40;
+	}
+
+	.form-check-input {
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		border: 2px solid #FFFFFF;
+	    width: 16px;
+	    height: 16px;
+	}
+	
+	.form-check-input:disabled {
+		border: 2px solid #4A4C57;
+	}
+	.form-check-input:checked {
+		border: 2px solid #00B1D0;
+	}
+	.form-check-input:checked:disabled {
+		border: 2px solid #4A4C57;
+	}
+	.form-check-input.custom-radio {
+		border-radius: 50%;
+	}
+	.form-check-input.custom-radio:before {
+	    content:'';
+	    display:block;
+	    width: 60%;
+	    height: 60%;
+	    margin: 20% auto;    
+	    border-radius:50%;    
+	}
+	.form-check-input.custom-radio:checked:before {
+		background: #00B1D0;
+	}
+	.form-check-input.custom-radio:checked:disabled:before {
+		border: 2px solid #4A4C57;
+		background: #4A4C57;
+	}
+	.form-check-input.custom-checkbox {
+		/*nothing*/
+		margin-top: -3px
+	}
+	.form-check-input.custom-checkbox:before {
+	    content:'';
+	    display:block;
+	    width:60%;
+	    height:60%;
+	    margin: 20% auto;    
+	}
+	.form-check-input.custom-checkbox:checked:before {
+		background: #00B1D0;
+	}
+	.form-check-input.custom-checkbox:checked:disabled:before {
+		border: 2px solid #4A4C57;
+		background: #4A4C57;
+	}
+	
+	.custom-form-control {
+		margin-right: 0px;
+		margin-left: 0px;
+	}
+	.custom-form-control label {
+		color:#1fbbd9;
+		position:absolute;
+		transform: translate(10px, 10px);
+		font-size: 9pt
+
+	}
+	.custom-form-control input {
+		display:inline;
+		padding-left:60px;
+		color: #000000 !important
+		/*padding-right: 20px;*/
+	}
+
+	.custom-form-control-file {
+		margin-right: 0px;
+		margin-left: 0px;
+		height: 34px;
+	}
+	.custom-form-control-file .progress {
+		background-color:transparent;
+		width:100%;
+		height:inherit;
+	}
+	.custom-form-control-file input {
+		display:inline;
+		position:absolute;
+		transform: translate(10px, -48px);
+		color: #ffffff !important
+	}
+
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+	  -webkit-appearance: none;
+	  margin: 0;
+	}
+	::-webkit-scrollbar	{
+		width: 8px;
+		background-color: transparent;
+	}
+	::-webkit-scrollbar-track{ 
+		background-color: #33363e; 
+	}
+
+	::-webkit-scrollbar-thumb {
+		/*border-radius: 6px;
+		-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
+		background-color: #1fbbd9;
+	}
+
+	/*FF only*/	
+	input[type=number] {
+	  -moz-appearance: textfield;
+	}
+	:root{
+		scrollbar-color: #1fbbd9 #33363e;
+		scrollbar-width: thin;
+	}
+
+	
+</style>
+<script>
+	//miscellaneous
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie !== '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
+	function generateRandomHexColor(){
+		var hex = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+		var color = "#"
+		for (var i=0; i<6; i++){
+			color += hex[Math.floor(Math.random()*hex.length)]
+		}
+		return color
+	}
+	function truncateString(str, len){
+		if(str.length>len){
+			str = str.slice(0,len)
+			str += '...'
+		}
+		return str
+	}
+	function isNumericKey(evt) {
+		var charCode = (evt.which) ? evt.which : evt.keyCode;
+		if (charCode != 46 && charCode != 45 && charCode > 31 && (charCode < 48 || charCode > 57)){
+			return false;
+		}
+		return true;
+	} 
+
+</script>

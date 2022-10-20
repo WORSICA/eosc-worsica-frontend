@@ -1,0 +1,124 @@
+/*https://codepen.io/polinovskyi/pen/embZmw*/
+.clearfix:after {
+    clear: both;
+    content: "";
+    display: block;
+    height: 0;
+}
+
+.wrapper {
+	display: table-cell;
+	height: 400px;
+	vertical-align: middle;
+}
+
+
+.pull-right {
+	float: right;
+}
+
+a, a:active {
+	color: #333;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #999;
+}
+
+/* Breadcrups CSS */
+
+.arrow-steps .step {
+	height: 80px;
+	font-size: 11px;
+	text-align: center;
+	color: #666;
+	cursor: default;
+	margin: 0 0px;
+	padding: 25px 25px 25px 25px;
+	min-width: 110px;
+	float: left;
+	position: relative;
+	background-color: #20222b;
+	color: #ffffff;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none; 
+  transition: background-color 0.2s ease;
+}
+
+.arrow-steps .step:after,
+.arrow-steps .step:before {
+	content: " ";
+	position: absolute;
+	top: 0;
+	right: -17px;
+	width: 0;
+	height: 0;
+	border-top: 40px solid transparent;
+	border-bottom: 40px solid transparent;
+	border-left: 17px solid #20222b;	
+	z-index: 2;
+  transition: border-color 0.2s ease;
+}
+
+.arrow-steps .step:before {
+	right: auto;
+	left: 0;
+	border-left: 17px solid #fff;	
+	z-index: 0;
+}
+
+.arrow-steps .step:first-child:before {
+	border: none;
+}
+
+.arrow-steps .step:first-child {
+	/*border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;*/
+}
+
+.arrow-steps .step span {
+	position: relative;
+	font-size:14px;
+	
+}
+
+.arrow-steps .step span:before {
+	opacity: 0;
+	/*content: "✔";*/
+	position: absolute;
+	top: -2px;
+	left: -20px;
+}
+
+.arrow-steps .step.done {
+	color: #fff;
+	background-color: #2CC0DE;
+	/*background-image: linear-gradient(180deg, #00B1D0 0%, #2CC0DE 71%, #6FE3FF 100%);*/
+}
+
+.arrow-steps .step.done span:before {
+	opacity: 1;
+	-webkit-transition: opacity 0.3s ease 0.5s;
+	-moz-transition: opacity 0.3s ease 0.5s;
+	-ms-transition: opacity 0.3s ease 0.5s;
+	transition: opacity 0.3s ease 0.5s;
+}
+
+.arrow-steps .step.current {
+	color: #fff;
+	background-color: #2CC0DE;
+	/*background-image: linear-gradient(180deg, #00B1D0 0%, #2CC0DE 71%, #6FE3FF 100%);*/
+}
+
+.arrow-steps .step.current:after {
+	border-left: 17px solid #2CC0DE;	
+	/*border-image: linear-gradient(180deg, #00B1D0 0%, #2CC0DE 71%, #6FE3FF 100%);*/
+}
+
+.arrow-steps .step.done:after {
+	border-left: 17px solid #2CC0DE;	
+	/*border-image: linear-gradient(180deg, #00B1D0 0%, #2CC0DE 71%, #6FE3FF 100%);*/
+}

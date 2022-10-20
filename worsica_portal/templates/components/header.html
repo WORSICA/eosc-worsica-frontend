@@ -1,0 +1,177 @@
+{% load staticfiles %}
+{% load i18n %}
+
+<style>
+  .navbar-brand {
+    margin-top: 7px;
+  }
+ 
+  .navbar-fixed-top .navbar-nav li a {
+  	margin-top: 10px;
+  	margin-right: 10px;
+  	color: #ffffff;
+  	padding-top: 5px;
+  	padding-bottom: 5px;
+  }
+  .navbar-fixed-top .navbar-nav li a:hover {
+    color: #1fbbd9;
+    background-color: transparent;
+  }
+
+  .dropdown-menu li a {
+  	padding-top: 10px !important;
+  	margin-top: 0px !important;
+	color: #2c3239 !important;
+  }
+  
+  .navbar-fixed-top {
+  	height:80px; 
+  	padding-left:20px;
+  	padding-right:20px;
+  	border-color: #33363e !important;
+  	background-color: #33363e;
+  	max-height:80px;
+  }
+</style>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">	
+  	<div class="navbar-header">
+  		<a class="navbar-brand" href="{% url 'index' %}" style='padding: 0px 0px; margin-right: 15px'>
+  			<img src="{% static 'images/logo.png'%}" height='65px' style='background-color: #ffffff; margin-left: -5px;'></img>
+  		</a>        
+	</div>		
+	<div class="navbar-collapse collapse navbar-responsive-collapse">
+			{% if request.user.is_authenticated %}
+		        {% if request.path == home_coastal %}
+		        <ul class="nav navbar-nav" style='width:95px;height:80px;color:#ffffff;position:relative;top:24px;'>
+		        	<li><b id='headerTitle' style='font-size:11px' >[Header title]</b></li>
+		        </ul>
+		        {% elif request.path == home_inland or request.path == home_waterleak %}
+		        <ul class="nav navbar-nav" style='width:95px;height:80px;color:#ffffff;position:relative;top:15px;'>
+		        	<li><b id='headerTitle' style='font-size:11px' >[Header title]</b></li>
+		        </ul>
+		        {% endif %}
+		        {% if request.path == home_coastal or request.path == home_inland or request.path == home_waterleak %}
+		        <ul class="nav navbar-nav" style='margin-left:10px' >
+					<div class="wrapper" style='height:0px'>							
+						<div class="arrow-steps clearfix">
+							<div id='step-ph1' class="step" onclick='onClickSelectStep()'>
+								<span style='font-weight:bold; position:absolute; top:15%; left:7px; width:100px;'>{%if request.path == home_waterleak %}Phase 1<br>Water Indexes<br>Climatology{% else %}Start<br>detection{% endif %}</span> 
+							</div>
+						</div>
+					</div>
+					<div class="wrapper" style='height:0px'>							
+						<div class="arrow-steps clearfix" id='step-ph1-workflow' style='display:none'>
+							<div id='step1ROI' class="step current">
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Region of<br> Interest</span> 
+							</div>
+							<div id='step2Inputs' class="step"> 
+								<span style='font-weight:bold; position: absolute;top: 25%;left: 13px;width:100px;'>{%if request.path == home_waterleak %}Image <br> Source {% else %} Inputs{% endif %}</span>
+							</div>
+							<div id='step3InputsRevision' class="step"> 
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>{%if request.path == home_waterleak %}Image <br> Selection{% else %}Inputs <br> Revision{% endif %}</span> 
+							</div>
+							<div id='step4Detection' class="step" {% if request.path == home_waterleak %} style='display:none'{% endif %}> 
+								<span style='font-weight:bold; position: absolute;top: 25%;left: 13px;width:100px;'>{%if request.path == home_waterleak %}Water Indexes{% else %}Detection{% endif %}</span> 
+							</div>
+							<!--{% if request.path == home_coastal %}
+							<div id='step5OCConnection' class="step"> 
+								<span style='font-weight:bold; position:absolute; top:36%; left:13px; width:100px;'>OPENCoastS</span> 
+							</div>
+							{% endif %}-->
+							<div id='step6Run' class="step"> 
+								<span style='font-weight:bold; position: absolute;top: 36%;left: 13px;width:100px;'>Summary</span> 
+							</div>
+						</div>						
+					</div>
+					{% if request.path == home_waterleak %}
+					<div class="wrapper" style='height:0px;padding-left: 20px;'>							
+						<div class="arrow-steps clearfix">
+							<div id='step-ph2' class="step" onclick='onClickSelectStep2()'>
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Phase 2<br>Leak Detection</span> 
+							</div>
+						</div>
+					</div>
+					<div class="wrapper" style='height:0px'>							
+						<div class="arrow-steps clearfix" id='step-ph2-workflow' style='display:none'>
+							<div id='step0DetectionSelection' class="step current" style='display:none'>
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Detection <br>selection</span> 
+							</div>
+							<div id='step1ImageSelection' class="step">
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Image <br>selection</span> 
+								<!--image selection + water index + (by index or by anomaly)-->
+							</div>
+							<!--<div id='step2LeakDetection' class="step"> 
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Calculate Anomaly</span> 
+							</div>	-->
+							<div id='step3LeakDetection' class="step"> 
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Pipe <br>Network</span> 
+							</div>	
+							<div id='step4LeakDetection' class="step"> 
+								<span style='font-weight:bold; position:absolute; top:25%; left:7px; width:100px;'>Identify <br>Leaks</span> 
+							</div>						
+							<!--<div id='step6LeakRun' class="step"> 
+								<span style='font-weight:bold; position: absolute;top: 36%;left: 13px;width:100px;'>Run</span> 
+							</div>-->
+						</div>						
+					</div>
+					{% endif %}
+		    	</ul>
+		    	{% endif %}
+	    	{% else %}
+	    	<ul class="nav navbar-nav" style='margin-top:15px;'>
+    			<li><a href='/index/#features'>Features</a></li>
+    			<li><a href='/index/#target'>Target</a></li>
+    			<li><a href="http://worsica.lnec.pt/">More info</a></li>
+    			
+    		</ul>	
+		        
+			{% endif %}
+
+	   
+	    <ul class="nav navbar-nav navbar-right" style='margin-top:15px;'>
+	    	{% if request.user.is_authenticated %}
+				{% if request.path == home_inland or request.path == home_coastal or request.path == home_waterleak %}
+					{% if request.path == home_waterleak %}
+					<li><a id='showLeakDetections' onclick='showVisualization("showLeakDetections")'>View Leak<br>Detections</a></li>
+					{% endif %}
+					<li><a id='showVisualization' onclick='showVisualization()'>Visualization</a></li>
+					<!--<li><a id='showUserRepo' onclick='showUserRepository()'>User<br> Repository</a></li>-->
+					<!--<li><a id='showDetectionManager' onclick='showDetectionManager()'>Detection Manager</a></li>-->	    	
+				{% endif %}
+				{% if request.path != login_egi %}
+					<li class="dropdown">
+					<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ request.user.first_name | truncatechars:10}}
+					{% if request.user.is_superuser %} (Administrator) {% elif request.user.is_staff %} (Staff) {% else %} (User) {% endif %}
+					<span class="caret"></span>
+					<br><span class="badge" style='background-color:#1fbbd9'>User ID: {{ request.user.id }}</span>
+					</a>
+					<ul class="dropdown-menu">
+						<li id='headerUser'><table style='margin: 3px 20px;'>
+							<tr>
+								<td style='width:20%'><img height="50px" src="/static/images/usericon.svg"></td>
+								<td><b class="dropdown-header">{{ request.user.first_name | truncatechars:10}}<br>
+									<span class="badge" style='background-color:#1fbbd9'>User ID: {{ request.user.id }}</span> 
+								</b></td>
+							</tr>
+							</table>
+						</li>
+						<div class="dropdown-divider"></div>
+						<!--<li><a href="/options/">Settings</a></li>-->
+						{% if request.user.is_superuser or request.user.is_staff %}
+						<li><a href="/admin/">Administrative Management</a> </li>
+						<li><a href="/metrics/">Metrics</a> </li>
+						{% endif %}
+						<!--<li><a href="{% url 'home' %}">Go back to WORSICA Home</a>-->
+						<li><a href="/accounts/logout">Logout</a> </li>
+					</ul>
+					</li>
+				{% endif %}
+	        {% else %}
+				<li><a href="/accounts/register">Register</a> </li>
+				<li><a href="/accounts/login">Login</a> </li>
+	        {% endif %}
+        </ul>
+	</div>
+</div>
+
+

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% load staticfiles %}
+<style>
+	.bgImage {
+		padding: 0 0 0 0;
+	}
+	.jumbotron {
+	    position: relative;
+	    height: 280px;
+	    color: white;
+	    text-shadow: black 0.2em 0.2em 0.2em;
+	    background:transparent;
+	    border: none;
+	    border-bottom: inset 1px #000;
+	}
+	.jumbotron h1 {
+	    padding-top: 25px;
+	}
+	.bg {
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 280px;
+	    z-index: -1;
+	    background: url('/static/images/turquoise-beach-blue-myrtos-722669.jpeg') no-repeat center bottom;
+	    background-size: cover;
+	    background-position: 50% 75%;
+	    opacity: 0.9;
+	    filter: alpha(opacity=90); /* For IE8 and earlier */
+	}
+	#pageContent {
+		overflow-y: auto;
+		position: static;
+		height: calc(100vh - 335px);
+		text-align: justify;
+		/*scrollbar-color: #1fbbd9 #33363e;
+		scrollbar-width: thin;*/
+	}
+	.row {
+		margin-right:0px;
+		margin-left:0px;
+	}
+</style>
+<div class="jumbotron text-center">
+	<div class="bg"></div>
+	<h1><span>WORSICA</span></h1>
+	<h2>Water Monitoring Sentinel Cloud Platform</h2>
+</div>
+<div id='pageContent'>
+	{% block content2 %}{% endblock %}
+</div>
+{% endblock %}

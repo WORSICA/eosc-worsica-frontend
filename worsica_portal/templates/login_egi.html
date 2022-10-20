@@ -1,0 +1,150 @@
+<title>WORSICA | EGI Registration</title>
+{% extends "base_banner_auth.html" %}
+
+{% block content3 %}
+
+{% load i18n %}
+{% load staticfiles %}
+<script type="text/javascript">
+    // Button Submit
+    function onClickSubmit(){
+        //cleanMessage();
+        try {
+            // Validate form
+            var fulfilledRequired = true;
+            $('.form input, .form select').each(function(){            	
+            	$('label[for="'+$(this).prop('name')+'"]').css('color','') 
+                if ($(this).prop('required') && $(this).val() == '') {
+                    fulfilledRequired = false;
+                    $('label[for="'+$(this).prop('name')+'"]').css('color','#ff0000')
+                }
+            });
+            if (!fulfilledRequired) {
+            	buildDynamicModalPopup('Error', 
+					'<p>To proceed, you must fill the required fields</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+                return false;
+            }            
+            else{
+	            // Send form data via client-side
+	            buildDynamicModalPopup('Registering your account', 
+					'<p>Please wait...</p>', 
+					[], [250,220])
+
+	            formSerialize = $('.form').serialize()
+	            formSerialize += '&affiliation_country='+$('#affiliation_country').val()
+	            //if disable fields, force the serialization
+	            $('input:disabled').each(function(e){
+	            	input_id=$(this).attr('id')
+	            	formSerialize += '&'+input_id+'='+$('#'+input_id).val()
+	            })
+	            
+	            console.log(formSerialize)
+	            $.ajax({
+	                type: 'POST',
+	                url: '/login-egi/complete/',
+	                data: formSerialize,
+	                success: function(data) {
+	                	dm.dialog("close")		     	
+	                	if(data['msgtype']=='notice'){
+	                		buildDynamicModalPopup('Success!', 
+								'<p>'+data['message']+'</p>', 
+								[['OK', function(){ 
+									$(this).dialog( "close" )
+									location.href = '/accounts/login/'
+								} ]], [250,220])
+	                	    return true; 
+	               		}
+	               		else{
+	               			buildDynamicModalPopup('Error', 
+								'<p>'+data['message']+'</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+	               			return false; 
+	               	    }
+	                                 	   
+	                },
+	                error: function(e, x, r) {
+	                    //console.log(r + ' - ' + e);
+	                    buildDynamicModalPopup('Error', 
+							'<p>An error occured, try again later.</p>', 
+							[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+	                    return false
+	                }
+	            });		       
+		    }
+	    } catch(err) {
+            //console.log(err);
+            buildDynamicModalPopup('Error', 
+				'<p>An error occured, try again later.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+            return false
+        }
+
+    }
+</script>
+
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<h3>Registration using EGI</h3>
+	</div>
+	<div class="col-md-4"></div>
+</div>
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<b>Using your EGI account information, some of the fields will appear filled below. You only need to fill the remaining fields.</b>
+		<p>* All fields are required</p>
+		<form class="form" method="post"> {% csrf_token %}
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="name">Name*</label>
+				<input style='display:inline; text-align:right;' class="form-control" type="text" name="name"
+					{% if given_name != None %}
+					value="{{ given_name }}" disabled
+					{% else %}
+					value=""
+					{% endif %}
+					id="name" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="surname">Surname*</label>
+				<input style='display:inline; padding-left: 80px; text-align:right;' class="form-control" type="text" name="surname" 
+					{% if family_name != None %}
+					value="{{ family_name }}" disabled
+					{% else %}
+					value=""
+					{% endif %}
+					id="surname" required><br>	
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="affiliation">Affiliation*</label>
+				<input style='display:inline; padding-left:80px; text-align:right;' class="form-control" type="text" name="affiliation" value="" id="affiliation" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="affiliation_country">Country*</label>
+				{% load countries %}
+				{% get_countries as countries %}
+				<select style='display:inline; text-align-last:right;' class="form-control" id="affiliation_country" required>
+				{% for country in countries %}
+				    <option value="{{ country.code }}" dir='rtl'>{{ country.name }}</option>
+				{% endfor %}
+				</select><br><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="email">Email*</label>
+				<input style='display:inline; text-align:right;' class="form-control" type="text" name="email" 
+					{% if email != None %}
+					value="{{ email }}" disabled
+					{% else %}
+					value=""
+					{% endif %} id="email" required><br>
+			</div>
+		</form>
+		<div style='text-align: center'>
+			<a id='btnRegister' class="btn btn-primary" onclick='onClickSubmit()'>Register</a>
+		</div>
+	</div>
+	<div class="col-md-4"></div>
+</div>
+{% endblock %}
+			

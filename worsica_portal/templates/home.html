@@ -1,0 +1,125 @@
+<title>WORSICA | Select sub-service</title>
+{% extends "base.html" %}
+
+{% block content %}
+
+{% load staticfiles %}
+<style>
+	.bgImage {
+		padding: 0 0 0 0;
+	}
+	.option{
+		position:relative;
+		top:70px;
+  		width:33.33%;
+  		/*margin-right:5px;*/
+  		/*margin-left:-30px;*/
+  		background-color: #20222b;
+	}
+	.option-image {
+		background-color: #cccccc;
+		height: 85.1%; /* You must set a specified height */
+		background-position: center; /* Center the image */
+		background-repeat: no-repeat; /* Do not repeat the image */
+		background-size: cover; /* Resize the background image to cover the entire container */
+		-webkit-filter: brightness(100%);
+  		filter: brightness(100%);
+  		margin:15px;
+  		transition: filter 0.2s linear;
+	}
+	.enter-btn {
+		color: #fff; 
+		background-image: linear-gradient(#1fbbd9,#65defa);
+	}
+
+	#coastal-option-image {
+		background-image:url({% static 'images/home-coastal.jpg'%});
+	}	
+	#inland-option-image {
+		background-image:url({% static 'images/home-inland.jpg'%});
+	}
+	#water-leak-option-image {
+		background-image:url({% static 'images/home-water-leak.jpg'%});
+	}
+
+	#description {
+		position: absolute;
+		color: #ffffff;
+		top: 45px;
+		margin: 80px;
+		margin-top: 0px;
+		opacity: 0;
+		transition: opacity 0.2s linear;
+		height:100%;
+	}
+</style>
+
+<script>
+	function optionHoverIn(id){
+		$('#'+id+'-option #description').css('opacity',1)
+		$('#'+id+'-option-image').css('-webkit-filter','brightness(30%)')
+		$('#'+id+'-option-image').css('filter','brightness(30%)')
+		//$('#'+id+'-option #description').css('bottom',-85)
+	}
+	function optionHoverOut(id){
+		$('#'+id+'-option #description').css('opacity',0)
+		$('#'+id+'-option-image').css('-webkit-filter','brightness(100%)')
+		$('#'+id+'-option-image').css('filter','brightness(100%)')
+		
+		//$('#'+id+'-option #description').css('bottom',0)
+	}
+	
+	$(function(){
+		buildDynamicModalPopup('Warning!', 
+			'<p>The WORSICA service is still under development in the scope of the ongoing project H2020-EOSC-Synergy (grant agreement No. 857647).</p>'+
+			'<p>The current version of the service is in the Beta Testing stage. Therefore, it may be subject to future changes and possible system failures.</p>'+
+			'<p>In case of eventual bugs, glitches, lack of functionality, or other problems that you may encounter, please inform us via the support email: worsica@lnec.pt</p>',
+			[['OK', function(){ 
+				$(this).dialog( "close" )
+			}]], [570,320])
+	})
+</script>
+
+<div class="row">
+	<div class="col-md-4 option" id='coastal-option' onmouseover="optionHoverIn('coastal')" onmouseout="optionHoverOut('coastal')">
+	  	<div class='option-image' id='coastal-option-image'>	  		
+	  	</div>
+	  	<div id='description'>
+	  		<div style="height: calc(80vh - 85px);position: static;">
+	  			<b>Coastline Detection</b>
+	  			<p>In this sub-service, the user will obtain: 1) the coastline determined from sentinel-2, UAV or Pleiades imagery, for a given Region-Of-Interest; 2) The sub-service could be also linked with OPENCoastS in order to produce a DEM based on the coastlines detected in 1).</p>
+	  		</div>
+	  		<div style='text-align: center;'>
+	  			<a href='/portal/coastal' class='btn btn-lg enter-btn'>Enter</a>
+	  		</div>
+	  	</div>
+	</div>
+	<div class="col-md-4 option" id='inland-option' onmouseover="optionHoverIn('inland')" onmouseout="optionHoverOut('inland')">
+	  	<div class='option-image' id='inland-option-image'>	  		
+	  	</div>
+	  	<div id='description'>
+	  		<div style="height: calc(80vh - 85px);position: static;">
+		  		<b>In-Land Water Bodies Detection</b>
+		  		<p>In this sub-service, the user will be able to obtain layers of water bodies detected in in-land regions (e.g. lakes or reservoirs), in order to characterize their volume and occupied/inundated areas.</p>
+		  	</div>
+	  		<div style='text-align: center'>
+	  			<a href='/portal/inland' class='btn btn-lg enter-btn'>Enter</a>
+	  		</div>
+	  	</div>
+	</div>
+	<div class="col-md-4 option" id='water-leak-option' onmouseover="optionHoverIn('water-leak')" onmouseout="optionHoverOut('water-leak')">
+	  	<div class='option-image' id='water-leak-option-image'>	  		
+	  	</div>
+	  	<div id='description'>
+	  		<div style="height: calc(80vh - 85px);position: static;">
+		  		<b>Leak Detection in Irrigation networks</b>
+		  		<p>The main goal of this sub-service is to identify and detect possible water leaks in (remote) irrigation networks automatically, from satellite and UAVs images, obtained systematically.</p>
+		  	</div>
+	  		<div style='text-align: center'>
+	  			<a href='/portal/waterleak' class='btn btn-lg enter-btn'>Enter</a>
+	  		</div>
+	  	</div>
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+<script>
+	var SERVICE_NAME = 'coastal'
+	var TITLE_SERVICE_NAME = 'COASTLINE DETECTION'
+</script>
+<title>WORSICA | Coastline Detection</title>
+{% extends "../home_template.html" %}
+
+{% block subcontent %}
+
+{% load staticfiles %}
+
+<script>
+	
+
+	$(function(){
+		$('input[name="optOCConfig"]').change(function(){
+			chosenOpt = this.value
+			console.log(chosenOpt)
+			$('#accordion1 #oc-deployment-id').prop('disabled', (chosenOpt != 'optOCConfig2'))
+		})	
+	})
+
+	
+</script>
+
+{% endblock %}

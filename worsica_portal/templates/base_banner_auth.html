@@ -1,0 +1,13 @@
+{% extends "base_banner.html" %}
+
+{% block content2 %}
+
+{% load staticfiles %}
+<div class="row">
+	<div class="col-md-2"></div>
+	<div class="col-md-8">
+		{% block content3 %}{% endblock %}
+	</div>
+	<div class="col-md-2"></div>
+</div>
+{% endblock %}

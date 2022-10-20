@@ -1,0 +1,107 @@
+<title>WORSICA | Metrics</title>
+{% extends "base.html" %}
+
+{% block content %}
+
+{% load staticfiles %}
+<script>
+    var d = new Date()
+
+    $(function(){        
+        d2 = d.toISOString().split('T')[0].split('-') //['2020','11','10']
+        loadMetrics(d2[0]+'-'+d2[1])
+    })
+
+    function goPreviousMonth(){
+        d = new Date(d.setMonth(d.getMonth()-1))
+        d2 = d.toISOString().split('T')[0].split('-')
+        loadMetrics(d2[0]+'-'+d2[1])
+    }
+    function goNextMonth(){
+        d = new Date(d.setMonth(d.getMonth()+1))
+        d2 = d.toISOString().split('T')[0].split('-')
+        loadMetrics(d2[0]+'-'+d2[1])
+    }
+
+    function loadMetrics(monthYear){
+        $('#titlemonthYear').text(monthYear)
+        $('#table_metrics #mu_nus').text('-')
+        $('#table_metrics #mu_nusa').text('-')
+        $('#table_metrics #mu_ncea').text('-')
+        $('#table_metrics #mu_ncoa').text('-')
+        $('#table_metrics #mu_nrusa').text('-')
+        $('#export_xls').attr("href","#")
+        buildDynamicModalPopup('Loading metrics', 
+			'<p>Please wait...</p>', [], [250,250])
+        $.get("/metrics.json?monthYear="+monthYear)
+			.done(function(data){                
+				var answer = $.parseJSON(JSON.stringify(data));
+                dm.dialog( "close" );
+                $('#table_metrics #mu_nus').text(answer['mu_nus'])
+                $('#table_metrics #mu_nusa').text(answer['mu_nusa'])
+                $('#table_metrics #mu_ncea').text(answer['mu_ncea'])
+                $('#table_metrics #mu_ncoa').text(answer['mu_ncoa'])
+                $('#table_metrics #mu_nrusa').text(answer['mu_nrusa'])
+                $('#export_xls').attr("href","/metrics.xls?monthYear="+monthYear)
+            })
+            .fail(function( xhr, textStatus, errorThrown ){
+                console.log( xhr, textStatus, errorThrown)
+                dm.dialog( "close" );
+                buildDynamicModalPopup('Error!', 
+                    '<p>Something went wrong while loadign metrics. Try again!</p>', 
+                    [['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+            })
+    }
+</script>
+<div>
+    <div class='row'>
+        <div class='col-md-6'>
+            <h3>Metrics</h3>
+            <a style='display:inline' onclick='goPreviousMonth()'><</a>
+            <h4 style='display:inline' id='titlemonthYear'></h4>            
+            <a style='display:inline' onclick='goNextMonth()'>></a>
+            <table id='table_metrics' class='table table-condensed'>
+                <tr>
+                    <th>Metric</th>
+                    <th>Explanation</th>
+                    <th>Value</th>
+                    <th>Units</th>
+                </tr>
+                <tr>
+                    <th>MU_NUS</th>
+                    <td>Number of different direct users who have accessed the service in a given period.</td>
+                    <th id='mu_nus'>-</th>
+                    <td>Users/month</td>
+                </tr>
+                <tr>
+                    <th>MU_NUSA</th>
+                    <td>Accumulative Number of direct different users who have accessed the service since PM6.</td>
+                    <th id='mu_nusa'>-</th>
+                    <td>Users</td>
+                </tr>
+                <tr>
+                    <th>MU_NCEA</th>
+                    <td>Accumulative Number of different centers where the users are based since PM6.</td>
+                    <th id='mu_ncea'>-</th>
+                    <td>Centers</td>
+                </tr>
+                <tr>
+                    <th>MU_NCOA</th>
+                    <td>Accumulative Number of different countries of origin of the users since PM6.</td>
+                    <th id='mu_ncoa'>-</th>
+                    <td>Countries</td>
+                </tr>
+                <tr>
+                    <th>MU_NRUSA</th>
+                    <td>Accumulative number of different users that accessed the service more than once since PM6.</td>
+                    <th id='mu_nrusa'>-</th>
+                    <td>Users</td>
+                </tr>
+            </table>
+            <a href='#' id='export_xls'>Export to XLS</a>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}

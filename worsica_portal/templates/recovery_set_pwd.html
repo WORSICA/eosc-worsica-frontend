@@ -1,0 +1,107 @@
+<title>WORSICA | Set password</title>
+{% extends "base_banner_auth.html" %}
+
+{% block content3 %}
+
+{% load i18n %}
+{% load staticfiles %}
+<script type="text/javascript">
+    // Button Submit
+    function onClickSubmit(){
+        try {
+            // Validate form
+            var fulfilledRequired = true;
+            $('.form input, .form select').each(function(){            	
+            	$('label[for="'+$(this).prop('name')+'"]').css('color','') 
+                if ($(this).prop('required') && $(this).val() == '') {
+                    fulfilledRequired = false;
+                    $('label[for="'+$(this).prop('name')+'"]').css('color','#ff0000')
+                }
+            });
+            if (!fulfilledRequired) {
+                buildDynamicModalPopup('Error', 
+					"To proceed, you must fill the required fields", 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+				return false
+            }
+            else{
+	            //Check passwords
+	            if ($('#cpassword').val() != $('#password').val()){
+					buildDynamicModalPopup('Error', 
+						"Passwords do not match!", 
+						[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+					return false
+	    		}
+	            // Send form data via client-side
+	            buildDynamicModalPopup('Sending request', 
+					'<p>Please wait...</p>', 
+				[], [250,220])
+	            $.ajax({
+	                type: 'POST',
+	                url: location.href+'post/',
+	                data: $('.form').serialize(),
+	                success: function(data) {
+						dm.dialog("close")	
+						if(data['msgtype']=='notice'){
+	                		buildDynamicModalPopup('Success!', 
+								'<p>'+data['message']+'</p>', 
+								[['OK', function(){ 
+									$(this).dialog( "close" )
+									location.href = '/accounts/login/'
+								} ]], [250,220])
+	                	    return true; 
+	               		}
+	               		else{
+	               			buildDynamicModalPopup('Error', 
+								'<p>'+data['message']+'</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+	               			return false; 
+	               	    }
+	                },
+	                error: function(e, x, r) {
+	                    //console.log(r + ' - ' + e);
+	                    dm.dialog("close")	
+	                    buildDynamicModalPopup('Error', 
+							"An error occured, try again later.", 
+							[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			           	return false
+	                }
+	            });
+	        }
+        } catch(err) {
+            //console.log(err);
+            dm.dialog("close")	
+			buildDynamicModalPopup('Error', 
+				"An error occured, try again later.", 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			return false
+        }
+    }
+</script>
+
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<h3>Set new password</h3>
+	</div>
+	<div class="col-md-4"></div>
+</div>
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<p>* Required field</p>
+		<form class="form" method="post"> {% csrf_token %}
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="password">Password*</label>
+				<input style='display:inline; padding-left: 80px; text-align:right;' class="form-control" type="password" name="password" value="" id="password" required><br>
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="password">Confirm Password*</label>
+				<input style='display:inline; padding-left: 140px; text-align:right;' class="form-control" type="password" name="cpassword" value="" id="cpassword" required><br>
+			</div>
+		</form>
+		<a id='btnRegister' class="btn btn-primary" onclick='onClickSubmit()'>Change password</a>
+	</div>
+	<div class="col-md-4"></div>
+</div>
+{% endblock %}

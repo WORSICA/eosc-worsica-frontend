@@ -1,0 +1,1827 @@
+{% include "essentials/_map_essentials.html" %}
+
+{% load staticfiles %}
+<style>
+  .bgImage {
+	padding: 0 0 0 0;
+  }
+  .map {
+    height: 100%;
+    width: 100%;
+  }
+  #map .ol-zoom {
+	display: none;
+  }
+  #map .ol-attribution {
+	display: none;
+	position: absolute;
+	bottom: 80px;
+	right: 40%;
+	background-color: #2CC0DE;
+  }
+  #map .ol-attribution button{
+  	background-color: #2CC0DE;
+  }
+  #map .ol-attribution ul {
+  	font-size: 1.3rem;
+  }
+
+  #map #new-controls{
+  	display: inline;
+	position: absolute;
+	bottom: 40px;
+	right: 40%;
+	width: 300px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }  
+  #map #new-controls #new-zoom-control{	
+  	display: inline;	
+  }  
+  #map #new-controls #mouse-position {
+  	display: inline;
+  	padding-left: 15px;
+  }
+  #map #new-controls #mouse-position .custom-mouse-position {
+	display: inline
+  }
+
+  #map #new-info-draw-polygon{
+  	display: inline;
+	position: absolute;
+	bottom: 80px;
+	right: 40%;
+	width: 400px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-draw-polygon #new-info-draw-polygon-active{	
+  	display: inline;	
+  }  
+
+  #map #new-info-edit-leak-points{
+  	display: inline;
+	position: absolute;
+	bottom: 80px;
+	right: 40%;
+	width: 500px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-edit-leak-points #new-info-edit-leak-points-active{	
+  	display: inline;	
+  }  
+
+  #map #new-info-edit-threshold{
+  	display: inline;
+	position: absolute;
+	bottom: 80px;
+	right: 40%;
+	width: 500px;
+	/*height: 700px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-edit-threshold #new-info-edit-threshold-active{	
+  	display: inline;	
+  } 
+
+  #map #new-info-eyedrop{
+  	display: inline;
+	position: absolute;
+	bottom: 80px;
+	right: 40%;
+	width: 300px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-eyedrop #new-info-eyedrop-active{	
+  	display: inline;	
+  } 
+
+  #map #new-info-plot-sea-topography-map{
+	display: inline;
+	position: absolute;
+	bottom: 80px;
+	right: 35%;
+	width: 400px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active{	
+  	display: inline;	
+  }
+
+  #map #new-info-show-open-layers{
+	display: inline;
+	position: absolute;
+	top: 90px;
+	right: 72%;
+	width: 400px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-show-open-layers #new-info-show-open-layers-active{	
+  	display: inline;	
+  }
+
+  
+
+  #map #new-info-preview-pipe{
+	display: inline;
+	position: absolute;
+	bottom: 50px;
+	right: 72%;
+	width: 400px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-preview-pipe #new-info-preview-pipe-active{	
+  	display: inline;	
+  }
+
+  #map #new-info-plot-sea-tide{
+	display: inline;
+	position: absolute;
+	top: 90px;
+	right: 45%;
+	width: 500px;
+	/*height: 30px;*/
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-plot-sea-tide #new-info-plot-sea-tide-active{	
+  	display: inline;	
+  }
+
+  #map #new-info-show-ruler{
+	display: inline;
+	position: absolute;
+	bottom: 50px;
+	right: 72%;
+	width: 200px;
+	z-index: 100;
+	background-color: #33363e;
+	color: #ffffff;
+  	padding: 2px;
+  }
+  #map #new-info-show-ruler #new-info-show-ruler-active{	
+  	display: inline;	
+  }
+
+  .tooltip {
+	position: relative;
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 4px;
+	color: white;
+	padding: 4px 8px;
+	opacity: 0.7;
+	white-space: nowrap;
+  }
+  .tooltip-measure {
+	opacity: 1;
+	font-weight: bold;
+  }
+  .tooltip-static {
+	background-color: #1fbbd9;
+	color: black;
+	border: 1px solid white;
+  }
+  .tooltip-measure:before,
+  .tooltip-static:before {
+	border-top: 6px solid rgba(0, 0, 0, 0.5);
+	border-right: 6px solid transparent;
+	border-left: 6px solid transparent;
+	content: "";
+	position: absolute;
+	bottom: -6px;
+	margin-left: -7px;
+	left: 50%;
+  }
+  .tooltip-static:before {
+	border-top-color: #1fbbd9;
+  }
+
+</style>
+<div id="map" class="map">
+	<div id='info' class="ol-popup"></div>
+	<div id='new-info-draw-polygon' style='display:none'>
+		<div id='new-info-draw-polygon-active'>
+			<p>You are now in draw rectangle mode, start drawing a rectangle on the map. Click again on the button to leave.</p>
+		</div>
+	</div>
+	<div id='new-info-eyedrop' style='display:none'>
+		<div id='new-info-eyedrop-active' style='display:inline'>
+			<table>
+				<tr>
+					<td width=32px>
+						<img id='new-eyedrop-control' src='/static/images/eyedrop2.svg' height=32px/>
+					</td>
+					<td style='padding-left:10px'>
+						<p style='font-size:10pt; display:inline;color: #ffffff; margin: 0 0 0px;' id='new-eyedrop-control-text'>(Click on the eyedropper button)</p>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div id='new-info-edit-threshold' style='display:none'>
+		<div id='new-info-edit-threshold-active'>
+			<p id='new-info-edit-threshold-active-text'>
+				 
+			</p>
+			<span id='new-info-edit-threshold-active-exitbtn'></span>
+		</div>
+	</div>
+	<div id='new-info-edit-leak-points' style='display:none'>
+		<div id='new-info-edit-leak-points-active'>
+			<p id='new-info-edit-leak-points-active-text'>
+				 
+			</p>
+			<span id='new-info-edit-leak-points-active-exitbtn'></span>
+		</div>
+	</div>
+	<div id='new-controls'>
+		<div id='new-zoom-control'>
+			<img id='new-zoom-control-zoomin' src='/static/images/zoomin.svg' height=32px/>
+			<img id='new-zoom-control-zoomout' src='/static/images/zoomout.svg' height=32px/>
+		</div>
+		<div id="mouse-position"></div>
+	</div>
+	<div id='new-info-show-open-layers' style='display:none;overflow-y: auto;max-height: 150px;'>
+		<div id='new-info-show-open-layers-active' style='padding-left:10px'>
+			<img id='new-info-show-open-layers-active-ocbtn' height="15px" style='margin-right: 10px;' width="15px" onclick="onClickActiveLayersOpenCloseBtn()" src="/static/images/arrow_down.svg">
+			<b>Active Layers 
+				<img height="16px" src="/static/images/info.svg" title="Information" style="margin-left:16px" onclick="onClickInfoButton('visualization-activelayers')"> 				
+			</b>
+			<table id='new-info-show-open-layers-table' style='width:94%;margin-top:10px;margin-bottom:10px;margin-left:10px;font-size:10pt;color:#cccccc'></table>
+		</div>
+	</div>
+	<div id='new-info-show-ruler' style='display:none;overflow-y: auto;height: 64px;max-height: 150px;'>
+		<div id='new-info-show-ruler-active'>
+			<table>
+				<tr>
+					<td width=32px>
+						<img id='new-ruler-control' src='/static/images/ruler2.svg' height=32px/>
+					</td>
+					<td style='padding-left:10px'>
+						<b style='font-size:10pt; display:inline;color: #ffffff; margin: 0 0 0px;'>Measure</b>
+						<img height="16px" src="/static/images/info.svg" title="Information" style="margin-left:16px" onclick="onClickInfoButton('visualization-ruler')"> 				
+						<select style="display:inline" id="measure-type" class="form-control">
+							<option value="length">Perimeter</option>
+							<option value="area">Area</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	{% if request.path == home_coastal %}
+	<!-- map topography -->
+	<div id='new-info-plot-sea-topography-map' style='display:none;'>
+		<div id='new-info-plot-sea-topography-map-active'>
+			<b style='font-size:10pt; display:inline;color: #ffffff; margin: 0 0 0px;'>Generate Topography </b><img height="16px" src="/static/images/info.svg" title="Information" style="margin-left:16px" onclick="onClickInfoButton('visualization-generate-topo')"> <br>
+			<p>Simulation <span id='sim_name'></span></p>
+			<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+				<label for="optSeaTopoMap1-div-name">Name</label>
+				<input class="form-control" type="text" id="optSeaTopoMap1-div-name" style="text-align:right" value="">
+			</div>
+			<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+				<label for="optSeaTopoMap1-div-zref">Z Reference</label>
+				<input class="form-control" type="number" id="optSeaTopoMap1-div-zref" style="text-align:right" value=0 onkeypress="return isNumericKey(event)">
+			</div>
+			<input class="form-check-input custom-radio" type="radio" id="optSeaTopoMap1" name="optSeaTopoMap" value="optSeaTopoMap1" checked>
+			<label for="optSeaTopoMap1">Probing</label>
+			<div id="optSeaTopoMap1-div">
+				<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+					<b>Coordinates: <span id="optSeaTopoMap1-div-coords">(click on a point on the map)</span></b>
+				</div>
+				
+			</div>
+			<br>
+			<input class="form-check-input custom-radio" type="radio" id="optSeaTopoMap2" name="optSeaTopoMap" value="optSeaTopoMap2">
+			<label for="optSeaTopoMap2">Upload</label>
+			<div id="optSeaTopoMap2-div" style="display:none">
+				<div id='divuploadseatide' class='subaccordion'>
+					<form style='font-size:10pt;display:inline' action='/portal/data/upload_sea_tides' method='post' enctype='multipart/form-data'>
+						{% csrf_token %}
+						<div class='custom-form-control-file'>
+						<div class='progress'>
+							<div class='progress-bar' style='width: 0%;background-color:#2CC0DE'></div>
+							<img id='upload_loading' style='display:none' height=16px src='/static/images/load.gif'/>
+						</div>
+						<p id='status_message'></p>
+						<input id='fileupload3' name='myfile' type='file' accept='.txt,application/txt'>
+						</div>
+					</form>
+				</div>
+			</div>
+			<br>
+			<a class='btn btn-sm btn-primary' onclick="disableGenerateTopomap()">Go back</a>
+			<a class='btn btn-sm btn-primary pull-right' id="submitTopoMap">Generate</a>
+			
+			<br>
+		</div>
+	</div>
+	<!-- sea tide -->
+	<div id='new-info-plot-sea-tide' style='display:none;'>
+		<div id='new-info-plot-sea-tide-active'>
+			<table>
+				<tr>
+					<td width=32px>
+						<img id='new-plot-sea-tide-control' src='/static/images/seatide2.svg' height=32px/>
+					</td>
+					<td style='padding-left:10px'>
+						<b style='font-size:10pt; display:inline;color: #ffffff; margin: 0 0 0px;'>Tidal Plot</b>
+						<img height="16px" src="/static/images/info.svg" title="Information" style="margin-left:16px" onclick="onClickInfoButton('visualization-plot-sea-tide')"> 				
+						
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id='new-info-plot-sea-tide-active2' style='display:none;overflow-y: auto;max-height: 270px;'>
+			<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+				<b>1 - Set the coordinates of a point in the water for tidal data retrieval </b><br>
+				<span id="optSeaTide1-div-coords">(click on a point on the map)</span>
+			</div>
+			<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+				<b>2 - Set the vertical level reference for the tidal data (If not defined, set it as 0). </b><br>
+				<label for="optSeaTide1-div-zref">Z Reference</label>
+				<input class="form-control" type="number" id="optSeaTide1-div-zref" style="text-align:right" value=0 onkeypress="return isNumericKey(event)">
+			</div>			
+			<!--TODO: Period-->
+			<div class='col-md-12 custom-form-control' style="padding-top:10px; padding-bottom:10px">
+				<b>3 - Set the dates </b><br>
+				<div class='custom-form-control' style='width:48%;float:left'>
+					<label for="beginDate">Start</label>
+					<input id="beginDate" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-01-01" style="padding-left:80px;text-align:right"/>
+				</div>
+				<div class='custom-form-control' style='width:48%;float:right'>
+					<label for="endDate">End</label>
+					<input id="endDate" onkeydown="event.preventDefault()" class="form-control" type="text" value="2020-12-31" style="padding-left:80px;text-align:right"/>
+				</div>
+				<a class='btn btn-sm btn-primary' onclick="onClickPlotSeaTideSubmit()">Show tidal plot</a>
+			</div>	
+		</div>
+		
+	</div>
+	{% endif %}
+	{% if request.path == home_waterleak %}
+	<div id='new-info-preview-pipe' style='display:none;overflow-y: auto;max-height: 170px;'>
+		<div id='new-info-preview-pipe-active' style='padding-left:10px'>
+			<b>Preview pipe network
+				<img height="16px" src="/static/images/info.svg" title="Information" style="margin-left:16px" onclick="onClickInfoButton('visualization-preview-pipe')"> 				
+			</b>
+			<div id="divuploadgeometry2" style="margin:10px;font-size:10pt;">
+				<!--<p>Upload a ZIP file of the pipe network for preview on the map. ZIP must contain at least the .shp, .shx and .dbf files. </p>-->
+				<form style='display:inline' action='/portal/proxy/intermediate/user_repository/waterleak/geometries/preview' method='post' enctype='multipart/form-data'>
+					{% csrf_token %}
+					<div class='custom-form-control-file'>
+					<div class='progress'>
+						<div class='progress-bar' style='width: 0%;background-color:#2CC0DE'></div>
+					</div>
+					<input id='fileupload2' name='myfile' type='file' accept='.zip,application/zip'>
+					<!--<p style='display:none' id='_store_pipe_network_id'></p>-->
+					</div>
+					<div id='status_message'></div>
+				</form>
+			</div>
+			<table id='new-info-preview-pipe-table' style='width: 94%;margin-top:10px;margin-bottom:10px;margin-left:10px;font-size:10pt;color:#cccccc;white-space: nowrap;table-layout: fixed;'></table>
+		</div>
+	</div>
+	{% endif %}
+</div>
+
+<script type="text/javascript">
+	//the minimum map to work
+	var map;
+	var view;
+	function loadMap(target, lat, lon, zoom){
+	    var apikey = '{{ openlayers_api_key }}' //WARNING: USE YOUR OWN KEY!
+
+	    var bingMapsAerial = new ol.layer.Tile({
+	    	title: 'Bing maps - Aerial',
+	    	type: 'base',
+            visible: true,
+	        source: new ol.source.BingMaps({
+	          key: apikey,
+	          imagerySet: 'AerialWithLabelsOnDemand', //'Aerial',
+	        })
+	    });
+
+	    var mousePositionControl = new ol.control.MousePosition({
+			coordinateFormat: function(coordinate) {
+     			return ol.coordinate.format(coordinate, '<b>Lat:</b> {y} <b>Lon:</b> {x}', 6);
+    		},
+			projection: 'EPSG:4326',
+			// comment the following two lines to have the mouse position
+			// be placed within the map.
+			className: 'custom-mouse-position',
+			target: document.getElementById('mouse-position'),
+			undefinedHTML: '<b>Lat:</b> --- <b>Lon:</b> ---'
+		});
+
+		map = new ol.Map({
+			controls: ol.control.defaults().extend([ mousePositionControl ]),
+			target: target,
+			layers: [ bingMapsAerial ],
+			view: new ol.View({
+			  center: ol.proj.fromLonLat([lon, lat]),
+			  zoom: zoom
+			})
+		});
+
+		$('#map #new-zoom-control #new-zoom-control-zoomin').on('click', function(){
+			mapView = map.getView()
+			mapView.animate({zoom: mapView.getZoom()+1, duration:500 })
+		})
+		$('#map #new-zoom-control #new-zoom-control-zoomout').on('click', function(){
+			mapView = map.getView()
+			mapView.animate({zoom: mapView.getZoom()-1, duration:500 })
+		})
+
+		$('#map #new-info-eyedrop #new-info-eyedrop-active #new-eyedrop-control').on('click', function(){
+			onClickEyedropper()
+		})
+		$('#map #new-info-show-ruler #new-info-show-ruler-active #new-ruler-control').on('click', function(){
+			onClickMeasure()
+		})
+		$('#map #new-info-show-ruler #new-info-show-ruler-active #measure-type').on('change', function(){
+			addMeasureInteraction()
+		})
+		$('#map #new-info-plot-sea-tide #new-info-plot-sea-tide-active #new-plot-sea-tide-control').on('click', function(){
+			onClickPlotSeaTide()
+		})
+	}
+	
+	
+
+	//main startup
+	loadMap('map', 38.71, -8.82, 6)
+    view = map.getView()
+
+	var MEASURE_MODE = false
+	var PLOT_SEA_TIDE_MODE = false
+    var DRAW_POLYGON_MODE = false
+    var EYEDROPPER_CLICK_MODE = false
+	var EDIT_LEAK_POINTS_MODE = false
+	var DELETE_LEAK_POINTS_MODE = false
+	var EDIT_LEAK_POINTS_REFERENCE = null //store the ID
+	var EDIT_LEAK_POINTS_LAYER_NAME = null //store layernames
+	//
+	var CREATE_CLEANUP_COASTLINE_MODE = false
+	var CREATE_THRESHOLD_MODE = false
+	var GENERATE_TOPOGRAPHY_MAP_MODE = false
+	var SET_POLYGON_CLEANUP_COASTLINE_MODE = null//null, draw, edit or delete
+	//
+	var GENERATE_TOPOGRAPHY_ROI_ID = null
+	var GENERATE_TOPOGRAPHY_SIM_ID = null
+	//
+	var startCoords = null
+	var extentS = null;
+	var extentF = null;
+	var drawnROI = null;
+	var chosenROI = null;
+	var markerVectorLayer = null;
+	var store_eyedropper_coords = null;
+	var drawMeasure = null;
+	
+	var thumbnailsourceLayer = null
+	var source = new ol.source.Vector();
+	var sourceLayer = new ol.layer.Vector({ 
+		source: source,
+		style: new ol.style.Style({	        
+	        stroke: new ol.style.Stroke({ color: '#00FF00', width: 3 })
+	    })
+	})
+	map.addLayer(sourceLayer)
+	var roiLayers = []	
+	var dragBox = new ol.interaction.DragBox({
+		condition: ol.events.condition.noModifierKeys
+	});
+
+	var overlay = new ol.Overlay({
+		element: document.getElementById('info'),
+		positioning: 'bottom-left'
+	});
+	overlay.setMap(map);
+
+	function _showAllROI(){
+		console.log('_showAllROI')
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				el.setVisible(true)			    
+			}
+		})
+	}
+	function _hideAllROI(){
+		console.log('_hideAllROI')
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				el.setVisible(false)			    
+			}
+		})
+	}
+
+	function highlightSelectedROI(roi_id){//normal highlight
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				stroke = el.getStyle().getStroke()
+			    if(el.get('name') == SERVICE_NAME+'-'+roi_id){ 
+			    	stroke_width = 3
+			    	chosenROI = el
+			    }
+			    else{ 
+			    	stroke_width = 0 
+			    }
+			    el.getStyle().setStroke(new ol.style.Stroke({ color: stroke.getColor(), width: stroke_width }) )
+			    el.changed()
+			}
+		})
+	}
+	function highlightSelectedROI2(roi_id){//just the highlighted roi is visible
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				stroke = el.getStyle().getStroke()
+				el.setVisible(el.get('name') == SERVICE_NAME+'-'+roi_id)
+			    if(el.get('name') == SERVICE_NAME+'-'+roi_id){ 
+			    	stroke_width = 3
+			    	chosenROI = el
+			    	map.getView().fit(chosenROI.getSource().getExtent(), {maxZoom:11, duration:2000});
+			    }
+			    else{ 
+			    	stroke_width = 0 
+			    }
+			    el.getStyle().setStroke(new ol.style.Stroke({ color: stroke.getColor(), width: stroke_width }) )
+			    el.changed()
+			}
+		})
+	}
+	function highlightSelectedROI3(roi_id){//with zoom
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				stroke = el.getStyle().getStroke()
+				//el.setVisible(el.get('name') == SERVICE_NAME+'-'+roi_id)
+			    if(el.get('name') == SERVICE_NAME+'-'+roi_id){ 
+			    	stroke_width = 3
+			    	chosenROI = el
+			    	map.getView().fit(chosenROI.getSource().getExtent(), {maxZoom:9, duration:2000});
+			    }
+			    else{ 
+			    	stroke_width = 0 
+			    }
+			    el.getStyle().setStroke(new ol.style.Stroke({ color: stroke.getColor(), width: stroke_width }) )
+			    el.changed()
+			}
+		})
+	}
+	function highlightSelectedROI4(roi_id){//with zoom and hide
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				stroke = el.getStyle().getStroke()
+				el.setVisible(el.get('name') == SERVICE_NAME+'-'+roi_id)
+			    if(el.get('name') == SERVICE_NAME+'-'+roi_id){ 
+			    	stroke_width = 3
+			    	chosenROI = el
+			    	map.getView().fit(chosenROI.getSource().getExtent(), {maxZoom:11, duration:2000});
+			    }
+			    else{ 
+			    	stroke_width = 0 
+			    }
+			    el.getStyle().setStroke(new ol.style.Stroke({ color: stroke.getColor(), width: stroke_width }) )
+			    el.changed()
+			}
+		})
+	}
+	function resetSelectedROI(){
+		chosenROI = null
+		map.getLayers().forEach(function(el) {
+			if(el.get('name') !== undefined){
+				el.setVisible(true)
+				stroke = el.getStyle().getStroke()
+			    stroke_width = 3
+			    el.getStyle().setStroke(new ol.style.Stroke({ color: stroke.getColor(), width: stroke_width }) )
+			    el.changed()
+			}
+		})
+	}
+	function enableDrawPolygonMode(){
+		DRAW_POLYGON_MODE = true
+		$('#iconDrawPolygon img').attr('src', '/static/images/drawpolygon.svg')
+		$('#new-info-draw-polygon').show()
+		chosenROI = null
+		if(drawnROI != null){
+			source.removeFeature(drawnROI)
+			drawnROI = null
+		}
+		dragBox = new ol.interaction.DragBox({ condition: ol.events.condition.noModifierKeys });
+		dragBox.on('boxstart', function(evt){ onDragbBoxStart(evt) });
+		dragBox.on('boxend', function(evt){ onDragBoxEnd(evt) });
+		map.addInteraction(dragBox);
+	}
+	function disableDrawPolygonMode(){
+		DRAW_POLYGON_MODE = false
+		$('#iconDrawPolygon img').attr('src', '/static/images/drawpolygon2.svg')
+		$('#new-info-draw-polygon').hide()
+		map.removeInteraction(dragBox);
+		dragBox = null
+		if(drawnROI != null){
+			source.removeFeature(drawnROI)
+			drawnROI = null
+		}
+	}
+	
+	function enableEyedropperClickMode(){//eyedropper and measure must not coexist
+		EYEDROPPER_CLICK_MODE = true
+		store_eyedropper_coords = null
+		$('#new-eyedrop-control').attr('src', '/static/images/eyedrop.svg')
+		$('#new-eyedrop-control-text').text('(Select a layer and click on a point of it)')
+		disableMeasureMode()
+		disablePlotSTMode()
+		//map.addInteraction(dragBox);
+	}
+	function disableEyedropperClickMode(){
+		EYEDROPPER_CLICK_MODE = false
+		if(markerVectorLayer){
+			map.removeLayer(markerVectorLayer);
+		}
+		store_eyedropper_coords = null
+		$('#new-eyedrop-control').attr('src', '/static/images/eyedrop2.svg')
+		$('#new-eyedrop-control-text').text('(Click on the eyedropper button)')
+		//map.removeInteraction(dragBox);
+		
+	}
+	
+	var measureTooltipElement = null;
+	var measure_vector = null;
+	var measure_source = new ol.source.Vector();
+	var measure_listener;
+	var measure_sketch;
+	var measureTooltipElement;
+	var measureTooltip;
+	var drawMeasure;
+	$(document).keyup(function (e) {
+		if (e.keyCode == 27) {//press escape
+			if(MEASURE_MODE){
+				$('#map .tooltip.tooltip-measure').remove()
+				map.removeInteraction(drawMeasure);
+				addMeasureInteraction();
+			}
+		}
+	});
+	function enableMeasureMode(){//eyedropper and measure must not coexist
+		MEASURE_MODE = true
+		$('#new-info-show-ruler-active #measure-type').show()
+		$('#new-ruler-control').attr('src', '/static/images/ruler.svg')
+		addMeasureInteraction();
+		//$('#new-eyedrop-control-text').text('(Select a layer and click on a point of it)')
+		//map.addInteraction(dragBox);
+		disableEyedropperClickMode()
+		disablePlotSTMode()
+	}
+	function disableMeasureMode(){
+		MEASURE_MODE = false
+		$('#new-info-show-ruler-active #measure-type').hide()
+		if(drawMeasure){
+			map.removeInteraction(drawMeasure);
+		}
+		//remove the yellow static tooltip when creating a new one
+		$('#map .tooltip').remove()
+		if(measure_vector){
+			map.removeLayer(measure_vector)
+			measure_vector = null
+		}	
+		$('#new-ruler-control').attr('src', '/static/images/ruler2.svg')
+		//$('#new-eyedrop-control-text').text('(Click on the eyedropper button)')
+		//map.removeInteraction(dragBox);
+	}
+
+	function enablePlotSTMode(){
+		PLOT_SEA_TIDE_MODE = true
+		disableDrawPolygonMode()
+		disableEyedropperClickMode()
+		disableMeasureMode()
+		disableGenerateTopomap()
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2').show()
+		$('#new-plot-sea-tide-control').attr('src', '/static/images/seatide.svg')
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #beginDate').datetimepicker({ 
+			mask:true, timepicker: false, format: 'Y-m-d',
+			/*onSelectDate: function(ct) {
+				$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #beginDate').find('.xdsoft_datetimepicker').css('top','600px')
+			}*/
+		})
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #endDate').datetimepicker({ 
+			mask:true, timepicker: false, format: 'Y-m-d',
+			/*onSelectDate: function(ct) {
+				$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #endDate').find('.xdsoft_datetimepicker').css('top','600px')
+			}*/
+		})
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #beginDate').val(yesterdayDate.toISOString().split('T')[0])
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #endDate').val(tomorrowDate.toISOString().split('T')[0])
+	}
+	function disablePlotSTMode(){
+		PLOT_SEA_TIDE_MODE = false
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2').hide()
+		$('#new-plot-sea-tide-control').attr('src', '/static/images/seatide2.svg')
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #optSeaTide1-div-zref').val(0)
+		$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #optSeaTide1-div-coords').text('(click on a point on the map)')
+		map.removeLayer(markerVectorLayer);
+	}
+	
+	var formatLength = function (line) {
+		var length = ol.Sphere.getLength(line);
+		var output;
+		if (length > 100) { output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km'; } 
+		else { output = Math.round(length * 100) / 100 + ' ' + 'm'; }
+		return output;
+	};
+	var formatArea = function (polygon) {
+		var area = ol.Sphere.getArea(polygon);
+		var output;
+		if (area > 10000) { output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>'; } 
+		else { output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>'; }
+		return output;
+	};	
+	function createMeasureTooltip() {//ballon tip on hover during creation
+		if (measureTooltipElement) {
+			measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+		}
+		measureTooltipElement = document.createElement('div');
+		measureTooltipElement.className = 'tooltip tooltip-measure';
+		measureTooltip = new ol.Overlay({
+			element: measureTooltipElement,
+			offset: [0, -15],
+			positioning: 'bottom-center',
+			stopEvent: false,
+			insertFirst: false,
+		});
+		map.addOverlay(measureTooltip);
+	}
+	function addMeasureInteraction() {	
+		if(drawMeasure){
+			map.removeInteraction(drawMeasure);
+			drawMeasure = null		
+		}
+		measureTooltipElement = null
+		measureTooltip = null
+		measure_source = new ol.source.Vector();
+		drawMeasure = new ol.interaction.Draw({
+			source: measure_source,
+			type: (document.getElementById('measure-type').value == 'area' ? 'Polygon' : 'LineString'),
+			style: new ol.style.Style({
+				fill: new ol.style.Fill({
+					color: 'rgba(255, 255, 255, 0.2)',
+				}),
+				stroke: new ol.style.Stroke({
+					color: 'rgba(231,0,0, 0.8)',
+					lineDash: [10, 10],
+					width: 2,
+				}),
+				image: new ol.style.Circle({
+					radius: 5,
+					stroke: new ol.style.Stroke({
+						color: 'rgba(231,0,0, 0.9)',
+					}),
+					fill: new ol.style.Fill({
+						color: 'rgba(255, 255, 255, 0.2)',
+					}),
+				}),
+			}),
+		});
+		map.addInteraction(drawMeasure);
+		createMeasureTooltip();
+		drawMeasure.on('drawstart', function (evt) { onDrawMeasureStart(evt) });
+		drawMeasure.on('drawend', function (evt) { onDrawMeasureEnd(evt) });
+	}
+
+	function onDrawMeasureStart(evt){
+		if (MEASURE_MODE){
+			
+			// set sketch
+			measure_sketch = evt.feature;
+			var tooltipCoord = evt.coordinate;
+
+			measure_listener = measure_sketch.getGeometry().on('change', function (evt) {
+				var geom = evt.target;
+				var output;
+				if (geom instanceof ol.geom.Polygon) {
+					output = formatArea(geom);
+					tooltipCoord = geom.getInteriorPoint().getCoordinates();
+				} else if (geom instanceof ol.geom.LineString) {
+					output = formatLength(geom);
+					tooltipCoord = geom.getLastCoordinate();
+				}
+				measureTooltipElement.innerHTML = output;
+				measureTooltip.setPosition(tooltipCoord);
+			});
+		}
+	}
+
+	function onDrawMeasureEnd(evt){
+		if (MEASURE_MODE){
+			//remove the yellow static tooltip when creating a new one
+			$('#map .tooltip.tooltip-static').remove()
+			if(measure_vector){
+				map.removeLayer(measure_vector)
+				measure_vector = null
+			}
+			
+			measureTooltipElement.className = 'tooltip tooltip-static';
+			measureTooltip.setOffset([0, -7]);
+					
+			measure_vector = new ol.layer.Vector({
+				source: measure_source,
+				style: new ol.style.Style({
+					fill: new ol.style.Fill({
+						color: 'rgba(255, 255, 255, 0.2)'
+					}),
+					stroke: new ol.style.Stroke({
+						color: '#1fbbd9',
+						width: 2
+					}),
+					image: new ol.style.Circle({
+						radius: 7,
+						fill: new ol.style.Fill({
+							color: '#1fbbd9'
+						})
+					})
+				})
+			});
+			map.addLayer(measure_vector)
+			// unset sketch
+			measure_sketch = null;
+			// unset tooltip so that a new one can be created
+			measureTooltipElement = null;
+			//createMeasureTooltip();
+			ol.Observable.unByKey(measure_listener);
+			addMeasureInteraction()
+		}
+	}
+	
+
+
+	function onDragbBoxStart(evt) {
+		if(DRAW_POLYGON_MODE){
+			$('#div-step1ROI #accordion1 #topLeftX').val('')
+			$('#div-step1ROI #accordion1 #topLeftY').val('')
+			$('#div-step1ROI #accordion1 #bottomRightX').val('')
+			$('#div-step1ROI #accordion1 #bottomRightY').val('')
+			$('#div-step1ROI #accordion1 #roiArea').text('--')
+			if(drawnROI != null){
+				source.removeFeature(drawnROI)
+				drawnROI = null
+			}			
+			extentS = null
+			extentF = null
+			startCoords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+			
+		}
+	}
+	function onDragBoxEnd(evt) {
+		if(DRAW_POLYGON_MODE){
+			var geom = evt.target.getGeometry()
+			var extent = geom.getExtent()
+			extentS = ol.proj.transform([extent[0],extent[1]], 'EPSG:3857', 'EPSG:4326');
+			extentF = ol.proj.transform([extent[2],extent[3]], 'EPSG:3857', 'EPSG:4326');
+	     	area_km = calculateAreaROI()
+	     	
+     		$('#div-step1ROI #accordion1 #roiArea').text(area_km) 
+			$('#div-step1ROI #accordion1 #topLeftX').val(parseFloat(extentS[0].toFixed(6)))
+			$('#div-step1ROI #accordion1 #topLeftY').val(parseFloat(extentS[1].toFixed(6)))
+			$('#div-step1ROI #accordion1 #bottomRightX').val(parseFloat(extentF[0].toFixed(6)))
+			$('#div-step1ROI #accordion1 #bottomRightY').val(parseFloat(extentF[1].toFixed(6)))
+			drawnROI = new ol.Feature({name: 'new_aos', geometry: geom});
+        	source.addFeature(drawnROI);
+
+        	//after drag disable draw polygon
+        	DRAW_POLYGON_MODE = false
+			$('#iconDrawPolygon img').attr('src', '/static/images/drawpolygon2.svg')
+			$('#new-info-draw-polygon').hide()
+			map.removeInteraction(dragBox);
+			dragBox = null
+		}
+	}
+	function get_pixel_value(coordinate){
+		outputLayers = []
+		map.getLayers().forEach(function(el) {
+			if (el.get('name') !== undefined){
+				if (el.get('name').indexOf('output-roi')>-1) {
+					outputLayers.push(el)
+				}
+			}
+		})
+		if(outputLayers.length>0){
+			//console.log(outputLayers[outputLayers.length-1].get('raster_id'))
+			var lonlat = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+			getRasterIdLastOpenLayer = outputLayers[outputLayers.length-1]
+			_url_run = '/portal/proxy/intermediate/endpoint/raster/pixel/'+coordinate[0]+'/'+coordinate[1]
+			if (getRasterIdLastOpenLayer.get('name').indexOf('-coastline-rgb')>-1){
+				$('#new-eyedrop-control-text').text('Error: Unable to provide pixel values on RGB image.')
+			}
+			else{
+				$('#new-eyedrop-control-text').text('Loading...')
+				$.getJSON(_url_run+'?layers=a='+getRasterIdLastOpenLayer.get('raster_id')+'&formula=a')
+					.done(function(data){
+						var answer = $.parseJSON(JSON.stringify(data)); 
+						console.log(getRasterIdLastOpenLayer.get('fname'))
+						sname="???"
+						if (getRasterIdLastOpenLayer.get('sname')!== undefined){
+							sname=getRasterIdLastOpenLayer.get('sname')
+						}
+						console.log(sname)
+						nameOfLastOpenLayer = getRasterIdLastOpenLayer.get('fname').split('|')
+						eyedrop_text = '<b>Lat:</b> '+parseFloat(lonlat[1]).toFixed(5)+' <b>Lon:</b> '+parseFloat(lonlat[0]).toFixed(5)
+						eyedrop_text += '<br><b>'+sname+'</b><br>'+nameOfLastOpenLayer[0]								
+						eyedrop_text += "<br><b>"+nameOfLastOpenLayer[1]+": "+answer['value'].toFixed(5)+'</b>'
+						$('#new-eyedrop-control-text').html(eyedrop_text)
+					})
+					.fail(function( xhr, textStatus, errorThrown ){
+						console.log( xhr, textStatus, errorThrown)
+						eyedrop_text = '<p>'+errorThrown+'</p>'
+						$('#new-eyedrop-control-text').html(eyedrop_text)
+					})
+			}
+		}
+		else{
+			$('#new-eyedrop-control-text').html('<p>Error: Please choose a layer before checking pixel value.</p>')
+		}
+	}
+
+	function onSingleClick(evt){
+		if(EYEDROPPER_CLICK_MODE){
+			var layer = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { return layer; });		
+			if(layer){
+				console.log(layer.get('name'))
+				map.removeLayer(markerVectorLayer);//remove marker
+				markerVectorLayer = null
+				var lonlat = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+				markerVectorLayer = new ol.layer.Vector({
+				  source: new ol.source.Vector({ 
+				  	features: [new ol.Feature({ geometry: new ol.geom.Point( ol.proj.fromLonLat(lonlat) ), })] 
+				  }),
+				});
+				markerVectorLayer.setZIndex(30)
+				map.addLayer(markerVectorLayer);
+				//list the open rasters
+				store_eyedropper_coords = evt.coordinate
+				get_pixel_value(store_eyedropper_coords)
+			}
+		}
+		else if(GENERATE_TOPOGRAPHY_MAP_MODE){
+			map.removeLayer(markerVectorLayer);//remove marker
+			markerVectorLayer = null
+			var lonlat = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+			markerVectorLayer = new ol.layer.Vector({
+				source: new ol.source.Vector({ 
+					features: [new ol.Feature({ geometry: new ol.geom.Point( ol.proj.fromLonLat(lonlat) ), })] 
+				}),
+			});
+			markerVectorLayer.setZIndex(30)
+			map.addLayer(markerVectorLayer);
+			$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-coords').text(lonlat)
+		}
+		else if(PLOT_SEA_TIDE_MODE){
+			map.removeLayer(markerVectorLayer);//remove marker
+			markerVectorLayer = null
+			var lonlat = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+			markerVectorLayer = new ol.layer.Vector({
+				source: new ol.source.Vector({ 
+					features: [new ol.Feature({ geometry: new ol.geom.Point( ol.proj.fromLonLat(lonlat) ), })] 
+				}),
+			});
+			markerVectorLayer.setZIndex(30)
+			map.addLayer(markerVectorLayer);
+			$('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #optSeaTide1-div-coords').text(lonlat)
+		}
+		else if (EDIT_LEAK_POINTS_MODE){
+			var layer = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { return layer; });
+			console.log(layer)
+			point_name = layer.get("name")
+			console.log(point_name)
+			if (layer){
+				map.getLayers().forEach(function (l2) {//layer group
+					if (l2.get('name') !== undefined && l2.get('name') === USLP_LAYER_NAME+'-edit'){
+						l2Array = [...l2.getLayers().getArray()]
+						l2Array.forEach(function (l3) {//layer
+							if (l3.get('name') !== undefined && l3.get('name') === point_name){	
+								l3name=l3.get('name')
+								console.log(l3name)
+								colorShow = $(EDIT_LEAK_POINTS_REFERENCE+"_linecolor polygon").attr('fill')
+								colorHide = "#220022"
+								//console.log(layer.get('url_point'))
+								url_point = layer.get('url_point')
+								//console.log(url_point)
+								circlestroke = layer.getStyle().getImage().getStroke()
+								//_style = _create_style_leak_points((circlestroke.getColor() == colorShow? colorHide : colorShow))
+								//layer.setStyle(_style)
+								$.ajax({ type: "GET", url: url_point, async: true,
+									success : function(response){
+										if(response['alert']=='success'){
+											showLeakPoint = response['leak_point']['showLeakPoint']
+											_style = _create_style_leak_points(showLeakPoint? colorShow : colorHide )
+											layer.setStyle(_style)
+										}
+										else{
+											//dm.dialog("close")
+											buildDynamicModalPopup('Error', 
+												'<p>Something went wrong on changing leak point. Try again.</p>', 
+												[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+										}
+									},
+									error: function(response){
+										//dm.dialog("close")
+										buildDynamicModalPopup('Error', 
+											'<p>Something went wrong on changing leak point. Try again.</p>', 
+											[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+									}
+								});
+								
+								//console.log(circlestroke)
+								layer.changed()
+								//console.log(EDIT_LEAK_POINTS_REFERENCE)
+							}
+						})
+					}
+				})
+			}
+		}
+		else if (DELETE_LEAK_POINTS_MODE){
+			var layer = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) { return layer; });
+			point_name = layer.get("name")
+			console.log(point_name)
+			if (layer){
+				map.getLayers().forEach(function (l2) {//layer group
+					if (l2.get('name') !== undefined && l2.get('name') === USLP_LAYER_NAME+'-edit'){
+						//console.log(l2.get('name'))
+						l2Array = [...l2.getLayers().getArray()]
+						l2Array.forEach(function (l3) {//layer							
+							if (l3.get('name') !== undefined && l3.get('name') === point_name){	
+								//prompt for deletion
+								l3name=l3.get('name')
+								console.log(l3name)
+								buildDynamicModalPopup('Warning!', 
+									'<p>You are about to delete this leak point. Continue?</p>', 
+									[['Yes', function(){ 
+										$(this).dialog( "close" )											
+										
+										l2.getLayers().remove(l3)
+										l3namesplit=l3name.split('-')
+										point_leak_id = parseInt(l3namesplit[l3namesplit.length-1])//get the last
+										if (LIST_DELETE_LEAK_POINTS.indexOf(point_leak_id)==-1){
+											LIST_DELETE_LEAK_POINTS.push(point_leak_id)
+										}
+										HAS_SAVED_CHANGES = false
+										$('#new-info-edit-leak-points #new-info-edit-leak-points-active-exitbtn #save_leak_points_btn').css('background-color','#bb0000')
+								}],
+								['No', function(){
+									$(this).dialog( "close" )
+								}]], [300,220])
+							}
+						})
+					}
+				})
+
+			}
+		}
+		else if(CREATE_CLEANUP_COASTLINE_MODE){
+			if(SET_POLYGON_CLEANUP_COASTLINE_MODE == 'delete'){
+				var clickedFeatures1 = coastlinePolygonsSourceVector.getFeaturesAtCoordinate(evt.coordinate);
+				//console.log(clickedFeatures1)
+				cf = clickedFeatures1[clickedFeatures1.length-1]//get the last one (top)
+				console.log(cf)
+				if(cf){
+					point_name = cf.get("name")
+					console.log(point_name)
+					buildDynamicModalPopup('Warning!', 
+						'<p>You are about to delete this polygon. Continue?</p>', 
+						[['Yes', function(){ 
+							$(this).dialog( "close" )											
+							coastlinePolygonsSourceVector.removeFeature(cf)
+							console.log('Removed '+point_name)
+						}],
+						['No', function(){
+							$(this).dialog( "close" )
+						}]], [300,220])
+					
+				}				
+			}
+		}
+	}
+
+	function onClickActiveLayersOpenCloseBtn(){
+		if ($("#new-info-show-open-layers-active-ocbtn").attr('src').indexOf('arrow_down')>-1){
+			//if opened
+			$("#new-info-show-open-layers-table").hide()
+			$("#new-info-show-open-layers-active-ocbtn").attr('src','/static/images/arrow_right.svg')
+		}
+		else{
+			//if closed
+			$("#new-info-show-open-layers-table").show()
+			$("#new-info-show-open-layers-active-ocbtn").attr('src','/static/images/arrow_down.svg')
+		}
+	}
+
+	function listActiveLayers(){
+		//$('#new-info-show-open-layers #new-info-show-open-layers-table').empty()
+		var layers = map.getLayers().getArray();
+		var output_layers = []
+		//filter
+		for (var i = layers.length - 1; i >= 0; --i) {//the last ones are the first to appear
+			var layer = layers[i];
+			layer_name = layer.get('name')
+			if (layer_name !== undefined && layer_name.indexOf('output-')>-1) {
+				//if ($('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+layer_name).length==0){
+				output_layers.push(layer)//append the top ones as first ones
+			}
+		}
+		if (output_layers.length==0){
+			$('#new-info-show-open-layers #new-info-show-open-layers-table').empty()
+			$('#new-info-show-open-layers #new-info-show-open-layers-table').append(
+				'<tr id=err-list-empty>'+
+					'<td><b>(No layers active)</b></td>'+
+				'</tr>'
+			)
+		}
+		else{
+			$('#new-info-show-open-layers #new-info-show-open-layers-table #err-list-empty').remove()
+			ol_trs = $('#new-info-show-open-layers #new-info-show-open-layers-table tr')
+			output_layers_map = $.map(output_layers, function(a){ return a.get('name') })
+			/*ol_trs_map = $.map(ol_trs, function(a){ return a.id })
+			$.grep(ol_trs_map, function(ol_tr_id) {
+    		    if ($.inArray(ol_tr_id, output_layers_map) == -1){
+					$('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+ol_tr_id).remove();
+				}
+			});*/
+			for (var i = 0; i<ol_trs.length; i++){//remove tr
+				ol_tr_id = ol_trs[i].id.replace('active-','')
+				if (output_layers_map.indexOf(ol_tr_id)==-1){
+					$('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+ol_tr_id).remove()
+				}
+			}
+			for (var j = 0; j<output_layers.length; j++){
+				layer = output_layers[j]
+				l = layer.get('fname').split('|')
+				sname="???"
+				if (layer.get('sname')!== undefined){
+					sname=layer.get('sname')
+				}
+				layer_name = layer.get('name')
+				if ($('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+layer_name).length==0){
+					$('#new-info-show-open-layers #new-info-show-open-layers-table').append(
+						'<tr id=active-'+layer_name+'>'+
+							'<td><b>'+sname+'</b><br>'+l[0]+' - '+l[1]+'</td>'+
+							'<td style="text-align:right">'+
+								'<a class="clickActiveLayerRemove" id="layerMoveToTop" onclick=onClickActiveLayer("movetotop","'+layer_name+'")><img height="24px" src="/static/images/movetotop.svg" title="Move to the top" style="margin:3px"></a>'+
+								'<a class="clickActiveLayerRemove" onclick=onClickActiveLayer("remove","'+layer_name+'")><img height="24px" src="/static/images/remove.svg" title="Deselect" style="margin:3px"></a>'+
+								'<a class="clickActiveLayerRemove" id="layerViewNoView" onclick=onClickActiveLayer("viewnoview","'+layer_name+'")><img height="24px" src="/static/images/view.svg" title="View/No View" style="margin:3px"></a>'+
+							'</td>'+
+						'</tr>'
+					)
+				}
+				else{
+					//move to the bottom
+					$('#new-info-show-open-layers #new-info-show-open-layers-table').append($('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+layer_name))
+				}
+				if (j==0){
+					$('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+layer_name+' #layerMoveToTop').hide()
+				}
+				else{
+					$('#new-info-show-open-layers #new-info-show-open-layers-table #active-'+layer_name+' #layerMoveToTop').show()
+				}
+			}
+		}
+		if(EYEDROPPER_CLICK_MODE){//maybe check if it is the top one, dont update?
+			if(store_eyedropper_coords != null){
+				get_pixel_value(store_eyedropper_coords)
+			}
+		}
+	}
+	
+	map.on('singleclick', function(evt) { onSingleClick(evt) })
+
+	function _create_style_leak_points(_color){
+		return new ol.style.Style({
+					image: new ol.style.Circle({
+						radius: 7,
+						fill: null,
+						stroke: new ol.style.Stroke({
+							color: _color, width: 4
+						})
+					})
+				})
+	}
+
+	//load features using geojsonvt
+	function loadFeatureGeojsonVT(jr_json, randomColor, rls=null){
+		var f = new ol.format.GeoJSON()
+		var feats = f.readFeatures(jr['json'],{ featureProjection: 'EPSG:4326' })
+		var jr2 = f.writeFeaturesObject(feats)
+		var tile_extent = 4096
+		var tileIndex = geojsonvt(jr2, {
+			extent: tile_extent,
+			tolerance: 0,
+			maxZoom: 20,
+			debug: 0
+		});
+		var tilePixels = new ol.proj.Projection({
+			code: 'TILE_PIXELS',
+			units: 'tile-pixels',
+		});
+		var replacer = function(key, value) {
+			if (value && value.geometry) {
+				var type;
+				var rawType = value.type;
+				var geometry = value.geometry;
+
+				if (rawType === 1) {
+					type = 'MultiPoint';
+					if (geometry.length == 1) {
+						type = 'Point'; geometry = geometry[0];
+					}
+				} else if (rawType === 2) {
+					type = 'MultiLineString';
+					if (geometry.length == 1) {
+						type = 'LineString'; geometry = geometry[0];
+					}
+				} else if (rawType === 3) {
+					type = 'Polygon';
+					if (geometry.length > 1) {
+						type = 'MultiPolygon'; geometry = [geometry];
+					}
+				}
+
+				return {
+					'type': 'Feature',
+					'geometry': {
+						'type': type,
+						'coordinates': geometry
+					},
+					'properties': value.tags
+				};
+			} else {
+				return value;
+			}
+		};
+
+		var sourceRoi = new ol.source.VectorTile({
+			format: new ol.format.GeoJSON(),
+			tileLoadFunction: function(tile) {
+				var format = tile.getFormat();
+				var tileCoord = tile.getTileCoord();
+				var data = tileIndex.getTile(tileCoord[0], tileCoord[1], -tileCoord[2] - 1);
+				var features = format.readFeatures(
+					JSON.stringify({
+						type: 'FeatureCollection',
+						features: data ? data.features : []
+					}, replacer));
+				tile.setLoader(function() {
+					tile.setFeatures(features);
+					tile.setProjection(tilePixels);
+				});
+			},
+			url: 'data:' // arbitrary url, we don't use it in the tileLoadFunction
+		});
+		var sourceLayerRoi = new ol.layer.VectorTile({
+			name: LAYER_NAME,
+			source: sourceRoi,
+			style: new ol.style.Style({	        
+				stroke: new ol.style.Stroke({ color: randomColor, width: 2 }),
+				fill: new ol.style.Fill({ color: randomColor })
+			})
+		});
+		sourceLayerRoi.setZIndex(20)
+		if (rls == null){ map.addLayer(sourceLayerRoi) }
+		else{ rls.push(sourceLayerRoi) }
+	}
+
+	{% if request.path == home_coastal or request.path == home_inland %}
+	//coastline draw multiple polygons
+	var coastlinePolygonsSourceVector = null
+	var coastlinePolygonsLayerVector = null
+	var coastlinePolygonsModify = null
+	var coastlinePolygonsDraw = null
+	var coastlinePolygonsSnap = null
+	var coastlinePolygonsId = 1
+
+	function coastlinePolygonsEnable() {
+		if(coastlinePolygonsLayerVector){
+			map.removeLayer(coastlinePolygonsLayerVector)
+		}
+		coastlinePolygonsSourceVector = new ol.source.Vector()
+		coastlinePolygonsLayerVector = new ol.layer.Vector({
+			source: coastlinePolygonsSourceVector,
+			style: new ol.style.Style({
+				fill: new ol.style.Fill({
+					color: 'rgba(255, 255, 255, 0.2)'
+				}),
+				stroke: new ol.style.Stroke({
+					color: '#1fbbd9',
+					width: 2
+				}),
+				image: new ol.style.Circle({
+					radius: 7,
+					fill: new ol.style.Fill({
+						color: '#1fbbd9'
+					})
+				})
+			})
+		});
+			
+		coastlinePolygonsModify = new ol.interaction.Modify({source: coastlinePolygonsSourceVector});
+		coastlinePolygonsDraw = new ol.interaction.Draw({source: coastlinePolygonsSourceVector, type: 'Polygon'});
+		coastlinePolygonsSnap = new ol.interaction.Snap({source: coastlinePolygonsSourceVector});
+		coastlinePolygonsId = 1
+
+		coastlinePolygonsDraw.on('drawend', function (evt) { onDrawCoastlinePolygonEnd(evt) });
+		coastlinePolygonsLayerVector.setZIndex(21)
+		map.addLayer(coastlinePolygonsLayerVector)	
+    }
+	function coastlinePolygonsAddInteractions(){
+		coastlinePolygonsAddInteractionModify()
+        coastlinePolygonsAddInteractionDraw()
+		coastlinePolygonsAddInteractionSnap()
+	}
+	function coastlinePolygonsAddInteractionModify(){
+		map.addInteraction(coastlinePolygonsModify)	
+	}
+	function coastlinePolygonsAddInteractionDraw(){
+        map.addInteraction(coastlinePolygonsDraw);	
+	}
+	function coastlinePolygonsAddInteractionSnap(){
+        map.addInteraction(coastlinePolygonsSnap);
+	}
+
+	function coastlinePolygonsDisable(){
+		coastlinePolygonsRemoveInteractions()//remove all interactions on exit
+		map.removeLayer(coastlinePolygonsLayerVector)
+		coastlinePolygonsSourceVector = null
+		coastlinePolygonsLayerVector = null
+		coastlinePolygonsModify = null
+		coastlinePolygonsDraw = null
+		coastlinePolygonsSnap = null
+		coastlinePolygonsId = 1
+	}	
+	function coastlinePolygonsRemoveInteractions(){
+		coastlinePolygonsRemoveInteractionModify()
+		coastlinePolygonsRemoveInteractionDraw()
+        coastlinePolygonsRemoveInteractionSnap()		
+	}
+	function coastlinePolygonsRemoveInteractionModify(){
+		map.removeInteraction(coastlinePolygonsModify)
+	}
+	function coastlinePolygonsRemoveInteractionDraw(){
+		map.removeInteraction(coastlinePolygonsDraw)
+	}
+	function coastlinePolygonsRemoveInteractionSnap(){
+		map.removeInteraction(coastlinePolygonsSnap)
+	}
+
+	function onDrawCoastlinePolygonEnd(evt){		
+		evt.feature.setProperties({'name': 'coastline_cleanup_polygon_'+coastlinePolygonsId})		
+		coastlinePolygonsId += 1
+		disableDrawPolygonCreateCleanupCoastline()
+	}
+	{% endif %}
+	
+	{% if request.path == home_coastal %}
+	/** TIDAL PLOT **/
+	function onClickPlotSeaTideSubmit(){
+		coords = $('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #optSeaTide1-div-coords').text()
+		zref = $('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #optSeaTide1-div-zref').val()
+		bD = $('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #beginDate').val()
+		eD = $('#new-info-plot-sea-tide #new-info-plot-sea-tide-active2 #endDate').val()
+		isBeginTimeAboveEndTime = (new Date(bD).getTime() > new Date(eD).getTime())
+
+		if (coords == '(click on a point on the map)'){
+			buildDynamicModalPopup('Error', 
+				'<p>Provide coordinates by clicking on a point on the map.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		}
+		else if (zref == ''){
+			buildDynamicModalPopup('Error', 
+				'<p>Z reference value must not be empty.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		}
+		else if (bD == ''){
+			buildDynamicModalPopup('Error', 
+				'<p>Please provide a valid begin date.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		}
+		else if (eD == ''){
+			buildDynamicModalPopup('Error', 
+				'<p>Please provide a valid end date.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		}
+		else if (isBeginTimeAboveEndTime){
+			buildDynamicModalPopup('Error', 
+				'<p>"From" date should be before the "until" date.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		}
+		else{
+			jsonR = {}
+			jsonR['zref'] = zref
+			jsonR['coords'] = coords
+			jsonR['beginDate'] = bD
+			jsonR['endDate'] = eD
+			buildDynamicModalPopup('Loading tides', 
+				'<p>Please wait...</p>', 
+				[], [250,220])
+			$.post('/portal/data/probe_sea_tides', JSON.stringify(jsonR))
+				.done(function( data ) {
+					var answer = $.parseJSON(JSON.stringify(data)); 
+					if(answer['alert']=='success'){
+						//console.log(answer)
+						dm.dialog( "close" );
+						buildDynamicModalPopup("Tide", 
+							'<table id="tabletransect" style="width:100%;">'+
+								'<tr>'+
+									'<td></td>'+
+								'</tr>'+
+							'</table>'+
+							'<div style="display:inline">'+
+								'<div id="loading_imagesets_warning" class="alert alert-warning" style="display:none"></div>'+
+								'<a id="download_txt" download="tide.txt" href="#" class="btn btn-sm btn-primary" style="display:none">Download text file</a>'+
+							'</div>', 
+							[['Close', function(){
+								$(this).dialog( "close" )
+							}]], [720,550])
+
+						tdata = answer['tide']
+						console.log('----deploy chart-----')
+						hchart = addSplineChart('transect', [], 'Date (UTC)', 'Elevation (m)')
+						//hchart.showLoading('Loading, please wait...');		
+						//unpack data
+						console.log('----add data to chart-----')
+						$('#loading_imagesets_warning').hide()
+						$('#loading_imagesets_warning').empty()
+						//
+						$('#download_txt').show()
+						$('#download_txt').attr('href',"data:text/plain;base64,"+answer['encodedData'])
+						useParallel = true
+						console.time('addDataToChart')
+						if (useParallel == true) {
+							numWorkers = 8
+							myFinishedWorkers = []
+							addPts = []						
+							for (var n=0; n<numWorkers; n++){
+								myFinishedWorkers[n] = false
+								setTimeout(function(tdata,n,numWorkers){
+									console.log('start worker '+n)
+									addPts[n] = []
+									for (var d=0; d<tdata.length; d++){
+										if(d%numWorkers==n){
+											addPts[n].push([tdata[d][0], tdata[d][1]])
+										}
+									}
+									console.log('finish worker '+n)
+									myFinishedWorkers[n] = true
+								}, 0, tdata,n,numWorkers)
+							}
+							console.log('start interval')
+							workersinterval = setInterval(function(myFinishedWorkers,numWorkers,hchart,addPts){
+								allWorkersFinished = false
+								for (var n=0; n<numWorkers; n++){
+									allWorkersFinished = allWorkersFinished || myFinishedWorkers[n]
+								}
+								if(allWorkersFinished){
+									console.log('all workers finished')
+									hchart.series[0].update({data: addPts.flat().sort()}, false)
+									hchart.redraw(false)
+									hchart.hideLoading()
+									$('#stateicon').hide()
+									$('#download_txt').show()
+									console.log('remove interval')
+									console.timeEnd('addDataToChart')
+									clearInterval(workersinterval)
+								}
+								else{
+									console.log('proceed...')
+								}
+							}, 500,myFinishedWorkers,numWorkers,hchart,addPts)
+						}
+						else {							
+							for (var d2=0; d2<tdata.length; d2++){
+								p = tdata[d2]
+								hchart.series[0].addPoint([p[0], p[1]], false)
+							}
+							hchart.redraw(false)
+							$('#stateicon').hide()
+							console.timeEnd('addDataToChart')
+						}
+						//esa
+						$('#loading_imagesets_warning').show()
+						$('#loading_imagesets_warning').text('Loading dates for matching imagesets, please wait...')
+						optInputs = ['optInput1','optInput5']//sentinel2 sentinel1
+						//hchart.addSeries({ data: [] });
+						for (var n=0; n<optInputs.length; n++){
+							_url = _urlListOfImagesets2('roi_'+roi_id, bD, eD, optInputs[n])
+							console.log(_url)
+							console.log('ESA search!')							
+							$.ajax({ type: "GET", url: _url, async: true,
+								success : function(response){
+									listOfImagery = $.parseJSON(JSON.stringify(response));
+									if (listOfImagery.length>0){
+										for (var image in listOfImagery){
+											if(['Level-2A','Level-1C'].indexOf(listOfImagery[image]['processinglevel'])>-1){
+												pn = 'S2'
+												custom_processinglevel_name =  pn+' '+listOfImagery[image]['processinglevel']
+												lcolor = 'red'
+											}
+											else{
+												pn = 'S1'
+												custom_processinglevel_name = pn+' '+listOfImagery[image]['producttype']
+												lcolor = 'yellow'
+											}
+											idate = new Date(listOfImagery[image]['date'].split('.')[0])
+											epochT = idate.getTime()
+											isDST = idate.getTimezoneOffset()<0 //-60 if summer (UTC+1), 0 if winter (UTC)
+											hchart.xAxis[0].addPlotLine({
+												value: epochT,
+												color: lcolor,
+												width: 3,
+												id: pn+'_'+epochT,
+												label: {
+													text: '<span class=spanish_inquisition id='+pn+'_'+epochT+'_span style="display:none">' + custom_processinglevel_name +' '+listOfImagery[image]['date'].split('.')[0] +(isDST? ' UTC+1': 'UTC')+'</span>',
+													y: -5,
+													x: 0,
+													useHTML: true,
+													style: { color: (lcolor=='red'?'#ffffff':'#000000'),
+														padding: '2px',
+														backgroundColor: lcolor,
+														verticalAlign: 'middle',
+														fontWeight: 'bold',
+														fontSize: '10px',
+														cursor: 'pointer'
+													}
+												},
+												events: {
+													mouseover: function(e) {
+														console.log(this.id)
+														$('#'+this.id+'_span').show()
+													},
+													mouseout: function(e) {
+														$('span .spanish_inquisition').hide();
+													}
+												}
+											})
+											/*pl.svgElem.on('mouseover', function () {
+												console.log(pl.id)												
+												//$('#'+this.parent.id+'_span').show();
+											});
+											pl.svgElem.on('mouseout', function () {
+												//console.log(this)
+												//$('#'+this.parent.id+'_span').hide();
+											});*/
+										}
+									}
+						
+								},
+								error: function(response){
+									
+									/*$('#listOfImagesets').empty()
+									$('#message').css('color','#bb0000')
+									$('#message').text('Error: Could not load imagesets from ESA Copernicus')*/
+								}
+							});
+							$('#loading_imagesets_warning').hide()
+						}
+						
+					}
+					else{
+						//console.log(answer)
+						dm.dialog( "close" );
+						buildDynamicModalPopup('Error', 
+							'<p>Something went wrong while probing sea tides. Try again.</p>', 
+							[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+					}
+				})
+				.fail(function( xhr, textStatus, errorThrown ){
+					console.log( xhr, textStatus, errorThrown)
+				})	
+		}
+	}
+
+	/** MAP SEA TOPOGRAPHY **/
+
+	$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #submitTopoMap').click(function(){
+		chosenOptSeaTopoMap = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active input[name="optSeaTopoMap"]:checked').prop('id')
+		jsonR = {}
+		jsonR['opt'] = chosenOptSeaTopoMap
+		jsonR['roi_id'] = GENERATE_TOPOGRAPHY_ROI_ID
+		jsonR['simulation_id'] = GENERATE_TOPOGRAPHY_SIM_ID
+		zref = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-zref').val()
+		name = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-name').val()
+		if (chosenOptSeaTopoMap == 'optSeaTopoMap1'){//probing
+			coords = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-coords').text()
+		
+			if (coords == '(click on a point on the map)'){
+				buildDynamicModalPopup('Error', 
+					'<p>Provide coordinates by clicking on a point on the map.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			}
+			else if (zref == ''){
+				buildDynamicModalPopup('Error', 
+					'<p>Z reference value must not be empty.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			}
+			else if (name == ''){
+				buildDynamicModalPopup('Error', 
+					'<p>Provide a name for processing your topography.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			}
+			else{
+				buildDynamicModalPopup('Submitting request', 
+					'<p>Please wait...</p>', 
+					[], [250,220])
+				jsonR['zref'] = zref
+				jsonR['coords'] = coords
+				jsonR['name'] = name					
+				$.post('/portal/data/generate_topography_roi_simulation', JSON.stringify(jsonR))
+					.done(function( data ) {
+						var answer = $.parseJSON(JSON.stringify(data)); 
+						if(answer['alert']=='created'){
+							//console.log(answer)
+							dm.dialog( "close" );
+							buildDynamicModalPopup('Success', 
+								'<p>Submitted successfully!</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+							disableGenerateTopomap()
+							_start_interval_list_simulations()
+						}
+						else{
+							//console.log(answer)
+							dm.dialog( "close" );
+							buildDynamicModalPopup('Error', 
+								'<p>Something went wrong while probing sea tides. Try again.</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+						}
+					})
+					.fail(function( xhr, textStatus, errorThrown ){
+						console.log( xhr, textStatus, errorThrown)
+					})	
+			}
+		}
+		else if (chosenOptSeaTopoMap == 'optSeaTopoMap2'){//upload
+			if (zref == ''){
+				buildDynamicModalPopup('Error', 
+					'<p>Z reference value must not be empty.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			}
+			else if (name == ''){
+				buildDynamicModalPopup('Error', 
+					'<p>Provide a name for processing your topography.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			}
+			else if ($('#divuploadseatide #fileupload3').val() == ''){
+				buildDynamicModalPopup('Error', 
+					'<p>Please select a file for upload.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+			}
+			else{
+				$('#divuploadseatide #upload_tide_btn').click() //submit 
+			}
+		}
+	})
+
+	function optionsSeaTopoMap(){
+		chosenOptSeaTopoMap = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active input[name="optSeaTopoMap"]:checked').prop('id')
+		if (chosenOptSeaTopoMap == 'optSeaTopoMap1'){//probing
+			$('#divuploadseatide #fileupload3').val('')	
+			$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap2-div').hide()
+			$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div').show()
+		}
+		else if (chosenOptSeaTopoMap == 'optSeaTopoMap2'){//upload
+			map.removeLayer(markerVectorLayer);
+			$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-coords').text("(click on a point on the map)")
+			$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div').hide()
+			$('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap2-div').show()
+			
+		}
+	}
+
+	//SEA TIDES: Upload txt file for chart
+	$('#divuploadseatide #status_message').css( 'color', '')
+	$('#divuploadseatide #status_message').empty()
+	$('#divuploadseatide .progress-bar').css( 'background', '#2CC0DE')
+	$('#divuploadseatide .progress-bar').css('width', '0%')
+	$('#divuploadseatide #fileupload3').val('')
+	$('#divuploadseatide #fileupload3').fileupload({
+		dataType: 'json',
+		replaceFileInput:false,
+		add: function (e, data) { 
+			$('#divuploadseatide #status_message').css( 'color', '')
+			$('#divuploadseatide #status_message').empty()
+			$('#divuploadseatide .progress-bar').css( 'background', '#2CC0DE')
+			$('#divuploadseatide .progress-bar').css( 'width', '0%')    
+			//click
+			data.context = $('<button id="upload_tide_btn" style="display:none;background-color: #2CC0DE"></button>').text('Upload')
+				.appendTo('#divuploadseatide #status_message')
+				.click(function () {
+					data.context = $('#divuploadseatide #status_message').text('Uploading file, please wait...')//.replaceAll($(this));
+					data.submit();
+					buildDynamicModalPopup('Uploading file!', 
+						'<p>Please wait...</p>', 
+						[], [250,220])
+				});
+		},
+		done: function (e, data) {
+			dm.dialog( "close" );
+			$('.ui-dialog-buttonset button[type="button"]').prop('disabled','')
+			if (data.result.alert == 'success'){
+				//$('#divuploadseatide .progress-bar').css( 'background', '#2CC0DE')
+				$('#divuploadseatide #status_message').css( 'color', '#00bb00')					
+				$('#divuploadseatide #status_message').empty()
+				fn = $('#divuploadseatide #fileupload3').val().split(/(\\|\/)/g).pop().split('.')[0]
+				//$('#divuploadseatide #status_message').append("<b>"+fn+" loaded!</b>")
+				$('#divuploadseatide #fileupload3').val('')
+				$('#divuploadseatide .progress-bar').css( 'width', '0%') 
+				
+				//generate topography
+				buildDynamicModalPopup('Submitting request', 
+					'<p>Please wait...</p>', 
+					[], [250,220])
+				jsonR = {}
+				jsonR['opt'] = 'optSeaTopoMap2'
+				jsonR['roi_id'] = GENERATE_TOPOGRAPHY_ROI_ID
+				jsonR['simulation_id'] = GENERATE_TOPOGRAPHY_SIM_ID
+				jsonR['zref'] = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-zref').val()
+				jsonR['name'] = $('#new-info-plot-sea-topography-map #new-info-plot-sea-topography-map-active #optSeaTopoMap1-div-name').val()
+				jsonR['encodedFile'] = data.result.encodedFile
+				$.post('/portal/data/generate_topography_roi_simulation', JSON.stringify(jsonR))
+					.done(function( data ) {
+						var answer = $.parseJSON(JSON.stringify(data)); 
+						if(answer['alert']=='created'){
+							//console.log(answer)
+							dm.dialog( "close" );
+							buildDynamicModalPopup('Success', 
+								'<p>Submitted successfully!</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+							disableGenerateTopomap()
+							_start_interval_list_simulations()
+						}
+						else{
+							//console.log(answer)
+							dm.dialog( "close" );
+							buildDynamicModalPopup('Error', 
+								'<p>Something went wrong while probing sea tides. Try again.</p>', 
+								[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+						}
+					})
+					.fail(function( xhr, textStatus, errorThrown ){
+						console.log( xhr, textStatus, errorThrown)
+					})
+							
+			}
+			else{
+				$('#divuploadseatide #status_message').css( 'color', '#dd0000')
+				$('#divuploadseatide #status_message').empty()
+				$('#divuploadseatide #status_message').append('<p>An error during upload occured: '+data.result.details+'.</p>')	
+				$('#divuploadseatide #fileupload3').val('')
+				$('#divuploadseatide .progress-bar').css( 'width', '0%') 
+				buildDynamicModalPopup('Error!', 
+					'<p>An error during upload occured: '+data.result.details+'.</p>', 
+					[['OK', function(){ $(this).dialog( "close" )} ]], [250,250])
+			}
+		},
+		fail: function (e, data) {
+			dm.dialog("close")
+			$('#divuploadseatide #status_message').css( 'color', '#dd0000')
+			$('#divuploadseatide #status_message').append('<p>An error during upload occured: '+data.result.message+'.</p>')
+			$('#divuploadseatide #fileupload3').val('')
+			$('#divuploadseatide .progress-bar').css( 'width', '0%') 
+			buildDynamicModalPopup('Error!', 
+				'<p>An error during upload occured: '+data.result.message+'.</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		},
+		progressall: function (e, data) {
+			$('.ui-dialog-buttonset button[type="button"]').prop('disabled','disabled')
+			var progress = parseInt(data.loaded / data.total * 100, 10);
+			$('#divuploadseatide .progress-bar').css( 'width', progress + '%' );
+		}
+	});
+	{% endif %}
+</script>

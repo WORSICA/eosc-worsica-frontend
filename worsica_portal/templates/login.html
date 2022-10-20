@@ -1,0 +1,94 @@
+<title>WORSICA | Login</title>
+{% extends "base_banner_auth.html" %}
+
+{% block content3 %}
+
+{% load i18n %}
+{% load staticfiles %}
+<script type="text/javascript">
+	function onClickPasswordRecovery(){
+		if ($('#email').val().indexOf('@')==-1){
+			buildDynamicModalPopup('Error', 
+				'<p>To recover password, please write a valid email address</p>', 
+				[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+            return false;
+    	}
+    	else{
+    		buildDynamicModalPopup('Sending request', 
+				'<p>Please wait...</p>', 
+				[], [250,220])
+    		$.ajax({
+                type: 'POST',
+                url: '/accounts/recovery/post/',
+                data: $('input[name=csrfmiddlewaretoken]').serialize()+'&'+$('#email').serialize(),
+                success: function(data) {
+                   dm.dialog("close")	
+                   buildDynamicModalPopup('Success', 
+						'<p>'+data['message']+'</p>', 
+						[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		           return true
+                },
+                error: function(e, x, r) {
+                    console.log(r + ' - ' + e);
+                    dm.dialog("close")	
+                    buildDynamicModalPopup('Success', 
+						"An error occured, try again later.", 
+						[['OK', function(){ $(this).dialog( "close" )} ]], [250,220])
+		           return false
+                }
+            });
+    	}
+	}
+</script>
+
+
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<h2>Login</h2>
+		{% if message != None %}  
+		<div class={{ msgtype }}>
+			{% if msgtype == "error" %}
+			<div style="background-color:#dd0000" class="well well-sm">{{ message }}</div>
+			{% elif msgtype == "notice" %}
+			<div style="background-color:#00ccff" class="well well-sm">{{ message }}</div>
+			{% endif %}
+		</div>
+		{% endif %}
+	</div>
+	<div class="col-md-4"></div>
+</div>
+<div class="row">
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<b style="font-size:21px; color:#1fbbd9">Normal authentication</b>
+		<form 
+			{% if next %}
+			action="/accounts/auth/?next={{ next }}"
+			{% else %}
+			action="/accounts/auth/"
+			{% endif %}
+			method="post"> {% csrf_token %}
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="email" required>Email</label>
+				<input style='display:inline; text-align:right;' class="form-control" type="text" name="email" value="" id="email">
+			</div>
+			<div class='custom-form-control' style='width:100%'>
+				<label style='display:inline' for="password" required>Password</label>
+				<input style='display:inline; padding-left:80px; text-align:right;' class="form-control" type="password" name="password" value="" id="password">
+			</div><br>
+			<div style='text-align: center'>
+				<input class="btn btn-primary" type="submit" value="Sign up" />
+				<a class="btn btn-default" href='/accounts/register'>Register</a><br>
+				<a onclick='onClickPasswordRecovery()'>I forgot my password</a>
+			</div>
+		</form>
+		<hr>
+		<div style='text-align: center'>
+			<p>Or authenticate using EGI-AAI federated autentication. Click on the icon below to start.</p>
+			<a class='btn btn-default' href='/auth'><img height=40px src='/static/images/egi.png'></img></a>
+		</div>
+	</div>				
+	<div class="col-md-4"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<title>WORSICA | Main</title>
+{% extends "base_banner.html" %}
+
+{% block content2 %}
+
+{% load staticfiles %}
+<div class='row'>
+	<div class='col-md-2'></div>
+	<div class='col-md-8'>
+		<h4 style='line-height:1.5;text-align: justify;'><strong>WORSICA (Water Monitoring Sentinel Cloud Platform), a service that integrates remote sensing and in-situ data for the determination of water presence in coastal and inland areas, applicable to a range of purposes from the determination of flooded areas (from rainfall, storms, hurricanes or tsunamis) to the detection of large water leaks in major water distribution networks.</strong></h4>
+		<h4 style='line-height:1.5;text-align: justify;'>WORSICA is a one-stop-shop service to provide access to customized remote sensing services based on Copernicus data, currently applied to the detection of the coastal water land interface and the inland water detection (for large water infrastructure leak detection).
+		Members and Managers of WORSICA agree to be bound by the Acceptable Usage Rules, WORSICA Security Policy and other relevant EGI Policies, and to use the Infrastructure only in the furtherance of the stated goal of WORSICA.</h4>
+	</div>
+	<div class='col-md-2'></div>
+</div>
+<div class='row' id='features'>
+	<div class='col-md-2'></div>
+	<div class='col-md-8'>
+		<h3>Features</h3>
+		<!--<h4>Services</h4>
+		<p> WORSICA can be applied in three main services: Inland detection, Coastal detection and Water Leak detection. These services do differ each other on their workflow.</p>-->
+		<div class='row subrow'>
+			<div class='col-md-4'>
+				<h4><b>Coastline Detection</b></h4>
+				<p>In this sub-service, the user will obtain: 1) the coastline determined from sentinel-2, UAV or Pleiades imagery, for a given Region-Of-Interest; 2) The sub-service could be also linked with OPENCoastS in order to produce a DEM based on the coastlines detected in 1).</p>
+			</div>
+			<div class='col-md-4'>
+				<h4><b>In-Land Water Bodies Detection</b></h4>
+				<p>In this sub-service, the user will be able to obtain layers of water bodies detected in in-land regions (e.g. lakes or reservoirs), in order to characterize their volume and occupied/inundated areas.</p>
+			</div>
+			<div class='col-md-4'>
+				<h4><b>Leak Detection in Irrigation networks</b></h4>
+				<p>The main goal of this sub-service is to identify and detect possible water leaks in (remote) irrigation networks automatically, from satellite and UAVs images, obtained systematically.</p>
+			</div>
+		</div>
+	</div>
+	<div class='col-md-2'></div>
+</div>
+<div class='row' id='target'>
+	<div class='col-md-2'></div>
+	<div class='col-md-8'>
+		<h3>Target</h3>
+		<div class='row subrow'>
+			<div class='col-md-4'>
+				<h4><b>Partners</b></h4>
+				<p>Provide tools for coastal engineers, researchers and water supply managers to monitor and anticipate the impacts of eventual storm-surges/inundations on the coast and water leaks in irrigation networks.</p>
+			</div>
+			<div class='col-md-4'>
+				<h4><b>Companies</b></h4>
+				<p>Provide all coastal managers the historical morphology of the coastline for specific periods in time, supporting multiple uses such as water monitoring harbour activities, dredging works and building works on the coast.</p>
+			</div>
+			<div class='col-md-4'>
+				<h4><b>Scientific community</b></h4>
+				<p>These detections are also useful for the scientific community, supporting, for instance, field work and helping to understand the evolution of the coastline and erosion patterns in the coastal areas and other water systems.</p>
+			</div>			
+		</div>
+	</div>
+	<div class='col-md-2'></div>
+{% endblock %}
