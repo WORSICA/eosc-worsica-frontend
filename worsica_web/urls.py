@@ -33,15 +33,21 @@ urlpatterns = [
     url(r'^accounts/login/$', views.login, name='login'),
     url(r'^accounts/register/$', views.register, name='register'),
     url(r'^accounts/register/post/$', views.register_post, name='register_post'),
-    url(r'^accounts/activation/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.activation, name='activation'),
-    url(r'^accounts/activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.userprofile_activate, name='userprofile_activate'),
-    url(r'^activate_user/(?P<username>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/$', views.activate_user, name='activate_user'),
-    url(r'^deactivate_user/(?P<username>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/$', views.deactivate_user, name='deactivate_user'),
+    url(
+        r'^accounts/activation/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.activation, name='activation'),
+    url(r'^accounts/activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        views.userprofile_activate, name='userprofile_activate'),
+    url(r'^activate_user/(?P<username>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/$',
+        views.activate_user, name='activate_user'),
+    url(r'^deactivate_user/(?P<username>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/$',
+        views.deactivate_user, name='deactivate_user'),
 
     url(r'^accounts/recovery/post/$', views.recovery_post, name='recovery_post'),
-    url(r'^accounts/recovery_set_pwd/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.recovery_set_pwd, name='recovery_set_pwd'),
-    url(r'^accounts/recovery_set_pwd/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/post/$', views.recovery_set_pwd_post, name='recovery_set_pwd_post'),
-   
+    url(r'^accounts/recovery_set_pwd/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        views.recovery_set_pwd, name='recovery_set_pwd'),
+    url(r'^accounts/recovery_set_pwd/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/post/$',
+        views.recovery_set_pwd_post, name='recovery_set_pwd_post'),
+
     url(r'^accounts/auth/$', views.auth_view, name='authenticate'),
     url(r'^accounts/logout/$', views.logout, name='logout'),
 
@@ -52,13 +58,13 @@ urlpatterns = [
     url(r'^login-egi/complete/$', views.login_egi_complete, name='login_egi_complete'),
     url(r'^logout-egi/$', views.logout_egi, name='logout_egi'),
 
-    url(r'^metrics/', views.metrics, name = 'metrics'),
-    url(r'^metrics.json', views.get_json_metrics, name = 'get_json_metrics'),
-    url(r'^metrics.xls', views.export_xls_metrics, name = 'export_xls_metrics'),
-    
+    url(r'^metrics/', views.metrics, name='metrics'),
+    url(r'^metrics.json', views.get_json_metrics, name='get_json_metrics'),
+    url(r'^metrics.xls', views.export_xls_metrics, name='export_xls_metrics'),
+
 ]
 
 if not settings.DEBUG:
     urlpatterns += [
-        url(r'^static/(?P<path>.*)$', serve, {'document_root':settings.STATIC_ROOT}),
+        url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     ]

@@ -23,6 +23,4 @@ def init_logger(name, addr):
 	logging.config.dictConfig(LOGGING)
 	worsica_logger = logging.getLogger(name)
 	worsica_logger.setLevel(logging.DEBUG)
-	#handler = logging.handlers.SysLogHandler(address = addr)
-	#worsica_logger.addHandler(handler)
 	return worsica_logger

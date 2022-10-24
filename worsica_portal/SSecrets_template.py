@@ -1,2 +1,2 @@
 def getCredentials():
-	return  {"user":"foo","password":"bar"}  
+    return {"user": "foo", "password": "bar"}

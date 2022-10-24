@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
+import os
 
-import json, pprint
-import sys, os
 
 def _create_message(dic, msgtype, message):
     sdic = dic
@@ -11,87 +11,94 @@ def _create_message(dic, msgtype, message):
     sdic['message'] = message
     return sdic
 
+
 def test_registrations(formdata):
     user = None
     user_created = False
     try:
         jsonmsg = {}
-        #CHECK 
+        # CHECK
         is_form_inputs_good = True
-        _keys = ['name','surname','affiliation','email',]
+        _keys = ['name', 'surname', 'affiliation', 'email', ]
         for k in _keys:
             f, bad = utils.is_bad_input(formdata[k])
             if bad:
                 is_form_inputs_good = False
-                jsonmsg = _create_message(jsonmsg, 'error', 'Error: Found possible malicious code injection on '+k+': " '+str(f)+' "')
+                jsonmsg = _create_message(
+                    jsonmsg, 'error', 'Error: Found possible malicious code injection on '+k+': " '+str(f)+' "')
                 return jsonmsg
         if is_form_inputs_good:
-            #AND SANITIZE
+            # AND SANITIZE
             auth.password_validation.validate_password(formdata['password'])
-            get_user_by_username = User.objects.filter(username=utils.sanitize_input(formdata['email']))
+            get_user_by_username = User.objects.filter(
+                username=utils.sanitize_input(formdata['email']))
             get_user_by_email = User.objects.filter(email=utils.sanitize_input(formdata['email']))
-            user_not_exists = (len(get_user_by_username)==0 and len(get_user_by_email)==0)
-            if len(get_user_by_username)>0:
-                jsonmsg = _create_message(jsonmsg, 'error', 'Error: This username is already in use!')
+            user_not_exists = (len(get_user_by_username) == 0 and len(get_user_by_email) == 0)
+            if len(get_user_by_username) > 0:
+                jsonmsg = _create_message(
+                    jsonmsg, 'error', 'Error: This username is already in use!')
                 return jsonmsg
-            elif len(get_user_by_email)>0:
+            elif len(get_user_by_email) > 0:
                 jsonmsg = _create_message(jsonmsg, 'error', 'Error: This email is already in use!')
                 return jsonmsg
-            elif user_not_exists:				
+            elif user_not_exists:
                 print('all forms are clean, create account')
-                user, user_created = User.objects.get_or_create(username=utils.sanitize_input(formdata['email']), email = utils.sanitize_input(formdata['email']))
+                user, user_created = User.objects.get_or_create(username=utils.sanitize_input(
+                    formdata['email']), email=utils.sanitize_input(formdata['email']))
                 if user_created:
                     user.username = utils.sanitize_input(formdata['email'])
                     user.first_name = utils.sanitize_input(formdata['name'])
                     user.last_name = utils.sanitize_input(formdata['surname'])
                     user.set_password(formdata['password'])
-                    user.is_active = False #workaround to avoid email activations
-                    user.save()		
+                    user.is_active = False  # workaround to avoid email activations
+                    user.save()
                     # Try to update info if already exists
-                    userprofile, up_created =  worsica_portal_models.UserProfile.objects.get_or_create(user=user)
+                    userprofile, up_created = worsica_portal_models.UserProfile.objects.get_or_create(
+                        user=user)
                     if up_created:
                         userprofile.affiliation = utils.sanitize_input(formdata['affiliation'])
                         userprofile.affiliation_country = formdata['affiliation_country']
-                        #userprofile.confirm_registration = True 
                         userprofile.save()
-                        if not userprofile.confirm_registration: #user.is_active:
-                            #send email to activate account
+                        if not userprofile.confirm_registration:  # user.is_active:
+                            # send email to activate account
                             try:
-                                #token, uidb64 = user_token_encrypt(user)
-                                #confirmation_link = request.build_absolute_uri("/accounts/activation/"+str(uidb64)+'/'+str(token))	
-                                #print(confirmation_link)
-                                #utils.notify_registration(user, userprofile, confirmation_link)
-                                if user and user_created: #if new user, delete it
+                                if user and user_created:  # if new user, delete it
                                     user.delete()
-                                jsonmsg = _create_message(jsonmsg, 'notice','Success! In a few minutes, you will receive an email to activate account. Check SPAM.')
+                                jsonmsg = _create_message(
+                                    jsonmsg, 'notice', 'Success! In a few minutes, you will receive an email to activate account. Check SPAM.')
                                 return jsonmsg
                             except Exception as e:
                                 print(e)
-                                if user and user_created: #if new user, delete it
+                                if user and user_created:  # if new user, delete it
                                     user.delete()
-                                jsonmsg = _create_message(jsonmsg, 'error', 'Error sending email: '+str(e))
+                                jsonmsg = _create_message(
+                                    jsonmsg, 'error', 'Error sending email: '+str(e))
                                 return jsonmsg
                         else:
-                            #remove this temporary fix
-                            jsonmsg = _create_message(jsonmsg, 'notice', 'Success! You can now login.')
+                            # remove this temporary fix
+                            jsonmsg = _create_message(
+                                jsonmsg, 'notice', 'Success! You can now login.')
                             return jsonmsg
                     else:
-                        if user and user_created: #if new user, delete it
+                        if user and user_created:  # if new user, delete it
                             user.delete()
-                        jsonmsg = _create_message(jsonmsg, 'error', 'Error! User profile could not be created.')
+                        jsonmsg = _create_message(
+                            jsonmsg, 'error', 'Error! User profile could not be created.')
                         return jsonmsg
                 else:
                     jsonmsg = _create_message(jsonmsg, 'error', 'Error: This user already exists!')
                     return jsonmsg
         else:
-            jsonmsg = _create_message(jsonmsg, 'error', 'Error! Invalid inputs on form found, aborting registration!.')
+            jsonmsg = _create_message(
+                jsonmsg, 'error', 'Error! Invalid inputs on form found, aborting registration!.')
             return jsonmsg
     except Exception as e:
         print(e)
-        if user and user_created: #if new user, delete it
+        if user and user_created:  # if new user, delete it
             user.delete()
         jsonmsg = _create_message(jsonmsg, 'error', 'Error: '+str(e))
         return jsonmsg
+
 
 if __name__ == '__main__':
     import django
@@ -108,10 +115,10 @@ if __name__ == '__main__':
     from django.contrib.auth.models import User
 
     formdata = {}
-    formdata['name']='KfnqDuxw'
-    formdata['surname']='KfnqDuxw'
-    formdata['password']='teste12345678'
-    formdata['affiliation_country']='PT'
+    formdata['name'] = 'KfnqDuxw'
+    formdata['surname'] = 'KfnqDuxw'
+    formdata['password'] = 'teste12345678'
+    formdata['affiliation_country'] = 'PT'
     CULPRITS = [
         '^(#$!@#$)(()))******',
         '!(()&&!|*|*|',
@@ -127,7 +134,7 @@ if __name__ == '__main__':
         '-1 OR 3+994-994-1=0+0+0+1',
         "1 waitfor delay '0:0:15' --",
         "38AzTN4F'",
-        #"587ZjN95",
+        # "587ZjN95",
         "7iGM9awD') OR 193=(SELECT 193 FROM PG_SLEEP(15))--",
         "\'\"()&%<acx><ScRiPt >HZDq(9870)</ScRiPt>",
         "\'\"()&%<acx><ScRiPt >YMD3(9767)</ScRiPt>",
@@ -143,10 +150,10 @@ if __name__ == '__main__':
         "http://some-inexistent-website.acu/some_inexistent_file_with_long_name?.tst",
         "if(now()=sysdate(),sleep(15),0)",
         "J7asvjnz' OR 867=(SELECT 867 FROM PG_SLEEP(15))--",
-        #"@@jAHtX",
+        # "@@jAHtX",
         "jGgBFdhD')) OR 97=(SELECT 97 FROM PG_SLEEP(15))--",
-        #"@@JJ6mY",
-        #"QZ54TFs3",
+        # "@@JJ6mY",
+        # "QZ54TFs3",
         "ra5NegYr",
         "./sample@email.tst",
         "../sample@email.tst",
@@ -165,7 +172,7 @@ if __name__ == '__main__':
     for c in CULPRITS:
         print('-----------------')
         print(c)
-        formdata['email']=c
-        formdata['affiliation']=c
-        j=test_registrations(formdata)
+        formdata['email'] = c
+        formdata['affiliation'] = c
+        j = test_registrations(formdata)
         print(j['message'])

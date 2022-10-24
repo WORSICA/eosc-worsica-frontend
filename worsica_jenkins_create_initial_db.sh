@@ -49,7 +49,7 @@ if user_created:\n
 \tuser.set_password('${WORSICA_FRONTEND_SUPERUSER_PWD}')\n
 \tuser.save()\n
 \tprint('Success')\n
-user, user_created = User.objects.get_or_create(username='selenium_test@test.com', email = '${WORSICA_FRONTEND_SELENIUM_USERNAME}')\n
+user, user_created = User.objects.get_or_create(username = '${WORSICA_FRONTEND_SELENIUM_USERNAME}', email ='selenium_test@test.com')\n
 if user_created:\n
 \tprint('User selenium_test created')\n
 \tuser.is_active = True\n

@@ -1,7 +1,8 @@
 [flake8]
-extend-ignore = E402, F841, F821, E722, E501
+extend-ignore = E402, F841, F821, E722, E501, W191, E302, E401, W605
 max-line-length = 101
 exclude =
+    manage.py,
     .git,
     __pycache__,
     docs/,

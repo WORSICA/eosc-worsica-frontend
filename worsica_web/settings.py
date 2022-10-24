@@ -13,11 +13,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from worsica_portal import logger
 from . import settings_sensitive
-import sys
-#os.environ['RECAPTCHA_DISABLE'] = 'False'
 print('---------------------')
 print(os.environ['PYTHONIOENCODING'])
-#print(os.environ['RECAPTCHA_DISABLE'])
 print('---------------------')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -31,17 +28,17 @@ SECRET_KEY = settings_sensitive.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-IS_ON_INCD = True #flag to differentiate settings development with centaurus
+IS_ON_INCD = True  # flag to differentiate settings development with centaurus
 
 
-#CUSTOM VARIABLES
+# CUSTOM VARIABLES
 WORSICA_FOLDER_PATH, VENV_PYTHON_EXECUTABLE, LOG_PATH = settings_sensitive.getPaths(IS_ON_INCD)
 
 worsica_logger = logger.init_logger('WorSiCa-Portal.Settings', LOG_PATH)
 worsica_logger.info('Running on centaurus? '+str(IS_ON_INCD))
 
 WORSICA_INTERMEDIATE_URL = settings_sensitive.WORSICA_INTERMEDIATE_URL
-ALLOWED_HOSTS = settings_sensitive.getAllowedHosts(IS_ON_INCD)    
+ALLOWED_HOSTS = settings_sensitive.getAllowedHosts(IS_ON_INCD)
 
 # Application definition
 if DEBUG:
@@ -52,7 +49,7 @@ if DEBUG:
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
-        
+
         'django_countries',
         'django_auth_oidc',
 
@@ -68,7 +65,7 @@ else:
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
-        
+
         'django_countries',
         'django_auth_oidc',
         'snowpenguin.django.recaptcha2',
@@ -160,7 +157,7 @@ if DEBUG:
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-#AUTH OIDC
+# AUTH OIDC
 LOGIN_REDIRECT_URL = settings_sensitive.LOGIN_REDIRECT_URL
 AUTH_SERVER = settings_sensitive.AUTH_SERVER
 AUTH_SERVER_USERINFO = settings_sensitive.AUTH_SERVER_USERINFO
@@ -168,8 +165,8 @@ AUTH_CLIENT_ID = settings_sensitive.AUTH_CLIENT_ID
 AUTH_CLIENT_SECRET = settings_sensitive.AUTH_CLIENT_SECRET
 AUTH_SCOPE = settings_sensitive.AUTH_SCOPE
 
-#EMAIL
-#Email notifications settings
+# EMAIL
+# Email notifications settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = settings_sensitive.EMAIL_HOST
 EMAIL_USE_TLS = settings_sensitive.EMAIL_USE_TLS
@@ -185,10 +182,10 @@ REQUEST_IGNORE_PATHS = (
     r'^metrics/',
     r'^metrics.json',
     r'^portal/proxy/',
-    #r'^index/',
+    # r'^index/',
 )
 REQUEST_IGNORE_USER_AGENTS = (
-    r'^$', # ignore requests with no user agent string set
+    r'^$',  # ignore requests with no user agent string set
     r'Googlebot',
     r'Baiduspider',
 )
@@ -202,7 +199,7 @@ REQUEST_TRAFFIC_MODULES = (
 
 OPENLAYERS_API_KEY = settings_sensitive.OPENLAYERS_API_KEY
 
-if not DEBUG: #production
+if not DEBUG:  # production
     RECAPTCHA_ENGINE = 'recaptcha2'
     print(RECAPTCHA_ENGINE)
     MULTI_CAPTCHA_ADMIN = {
