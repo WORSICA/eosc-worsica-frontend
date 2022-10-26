@@ -80,3 +80,5 @@ functional_tests_files/*/*
 worsica-django-auth-oidc/
 worsica_web/settings_sensitive.py
 
+worsica_increment_tag_version.sh
+worsica_launch_release_public.sh
