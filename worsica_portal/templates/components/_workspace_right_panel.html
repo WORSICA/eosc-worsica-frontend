@@ -1503,6 +1503,7 @@
 							//console.log(_url)
 							intermediateRasterEndpoint = response['response']['url']
 							usesCustomColorspace = response['customColorspace']
+							provider = response['response']['type']
 							console.log(intermediateRasterEndpoint)
 							is_2nd_deriv = (leak_detection_kind!='' && leak_detection_kind_split[0].indexOf('2nd_deriv')>-1)
 							//
@@ -1523,7 +1524,8 @@
 							}
 							//
 							if (kind=='RGB'){
-								rl_url = intermediateRasterEndpoint+'/{z}/{x}/{y}.png?layers=r:0='+raster_id+',g:1='+raster_id+',b:2='+raster_id+'&scale='+minBar+','+maxBar+'&enhance_brightness=5'
+								rl_layer_url = 'r:0='+raster_id+',g:1='+raster_id+',b:2='+raster_id+'&enhance_brightness=5'
+								rl_url = intermediateRasterEndpoint+'/{z}/{x}/{y}.png?scale='+minBar+','+maxBar+'&layers='+rl_layer_url
 							}
 							else if (is_topography && usesCustomColorspace){
 								cm = response['response']['colormap'].replaceAll(': ',':').replaceAll(', ',',').replaceAll('\'','\"')	
@@ -1611,11 +1613,13 @@
 								intermediateRasterEndpoint = response['response']['url']
 								minBar = parseFloat(response['response']['min'])
 								maxBar = parseFloat(response['response']['max']) //remove some of this scale to make it more bright
+								provider = response['response']['type']
+								rl_layer_url = 'r:0='+raster_id+',g:1='+raster_id+',b:2='+raster_id+'&enhance_brightness=5'
 								rl2 = new ol.layer.Tile({
 									name: LAYER_NAME_RGB,
 									extent: chosenROI.getSource().getExtent(),
 									source: new ol.source.XYZ({
-										url: intermediateRasterEndpoint+'/{z}/{x}/{y}.png?layers=r:0='+raster_id+',g:1='+raster_id+',b:2='+raster_id+'&scale='+minBar+','+maxBar+'&enhance_brightness=5',
+										url: intermediateRasterEndpoint+'/{z}/{x}/{y}.png?scale='+minBar+','+maxBar+'&layers='+rl_layer_url,
 										opaque: false
 									})
 								})
