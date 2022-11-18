@@ -3,15 +3,53 @@ function addHistogramChart(divId, data, xAxisTitle, yAxisTitle){
 	var chartDiv = "chart"+divId
 	var tableId = "table"+divId
 
-	var isInverted = false	
+	/*const render = function() {
+		const chart = this,
+		points = chart.series[0].points
+	  
+		if (!chart.customPlotLines) {
+		  chart.customPlotLines = [];
+	  
+		  chart.xAxis[0].options.customPlotLines.forEach(plotLineOptions => {
+			chart.customPlotLines.push(chart.renderer.path().attr({
+			  stroke: plotLineOptions.color,
+			  'stroke-width': plotLineOptions.width,
+			  zIndex: plotLineOptions.zIndex
+			}).add());
+		  });
+		}
+	  
+		if (chart.customPlotLines && chart.customPlotLines.length) {
+		  chart.xAxis[0].options.customPlotLines.forEach((plotLineOptions, i) => {
+			console.log(plotLineOptions)
+			idx = 0
+			for (var p=0; p<points.length; p++){
+				if (points[p].category <= plotLineOptions.value){
+					idx = p
+				}
+				else{
+					break
+				}
+			}
+			console.log(idx)
+			console.log(points[idx])
+			chart.customPlotLines[i].attr({
+			  d: [
+				'M', chart.plotLeft + points[idx].plotX, chart.plotTop,
+				'L', chart.plotLeft + points[idx].plotX, chart.plotTop + chart.plotSizeY
+			  ]
+			});
+		  });
+		}
+	}*/
 	
 	console.log('----create chart-----')
 	$("#"+tableId+" tr td").html("<div class='graph' id='"+chartDiv+"'></div>");
 	hchart = Highcharts.chart(chartDiv,{
 		chart: {
-			height:200,
+			height:300,
 			type: 'column',
-			backgroundColor: 'transparent', 
+			backgroundColor: 'transparent',
 		},
 		title: {
 			text: 'Histogram'
@@ -37,7 +75,7 @@ function addHistogramChart(divId, data, xAxisTitle, yAxisTitle){
 				style: {
 					color: '#EEEEEE'
 				}
-			},
+			}
 		},
 		yAxis: {
 			min: 0,
@@ -83,7 +121,7 @@ function addHistogramChart(divId, data, xAxisTitle, yAxisTitle){
 			}
 		}]
 	})
-
+	return hchart
 }
 
 

@@ -3451,7 +3451,7 @@
 		$('#map #new-info-show-ruler').show()
 		$('#map #new-info-edit-leak-points').hide()
 		$('#map #new-info-edit-threshold').hide()
-		$('#map #new-info-plot-sea-tide').hide()
+		$('#map #new-info-plot-sea-tide').show()
 		$('#map #new-info-plot-sea-topography-map').hide()
 		openRightPanel()
 		//hide other layers		
@@ -4353,11 +4353,13 @@
 	function onClickThresholdButton(type, kind, roi_id, simulation_id, simulation_imageset_id){
 		CT_REFERENCE = '#simulation_'+simulation_id+'_imageset_'+simulation_imageset_id+'_'+kind
 		CT_WI_REFERENCE = '#simulation_'+simulation_id+'_imageset_'+simulation_imageset_id+'_wi_'+kind
+		raster_id = $(CT_REFERENCE+'_raster_id').text()			
 		//LAYER_NAME = 'output-roi_'+roi_id+'-simulation'+simulation_id+'-imageset'+simulation_imageset_id+'-'+kind
 		if((['mndwi','ndwi','awei','aweish'].indexOf(kind)>-1)){
 			if (type == 'create_threshold'){	
 				if(CREATE_THRESHOLD_MODE){
-					disableCreateThreshold()				
+					disableCreateThreshold()
+					onChangeChkboxImagesetShowOutput2(false, false, kind, roi_id, simulation_id, simulation_imageset_id, null, raster_id)	//remove wi layer			
 					$('#new-info-edit-threshold #new-info-edit-threshold-active-text').empty()
 					$('#new-info-edit-threshold #new-info-edit-threshold-active-exitbtn').empty()
 				}
@@ -4371,7 +4373,7 @@
 					shapeline_sim_name = $('#simulation_'+simulation_id+'_name').text()
 					shapeline_imageset_name = $('#simulation_'+simulation_id+'_imageset_'+simulation_imageset_id+'_name').text()
 					shapeline_prod_name = $(CT_REFERENCE+'_name').text()//.split(' (Orig. Threshold')[0]
-					raster_id = $(CT_REFERENCE+'_raster_id').text()					
+							
 					$('#new-info-edit-threshold #new-info-edit-threshold-active-text').append(
 						"<b>Create manual threshold</b><br>"+
 						"<b style='font-size:10pt'>"+shapeline_sim_name+" > "+shapeline_imageset_name+" > "+shapeline_prod_name+"</b><br>"+
@@ -4380,14 +4382,22 @@
 								'<td></td>'+
 							'</tr>'+
 						'</table>'+
-						"Instructions: Look at the histogram above and see the threshold value you want to apply. You can also click on the chart to automatically set the value. "+
-						"<b>When changing the threshold value, the layer will preview the final result.</b>"+
-						"To finish, click on 'Generate', and give a name to your new shapeline. </br>"+
-						"To leave, click on 'Go to Visualization'. "+
-						'<div class="custom-form-control" style="padding-left:10px">'+
-							'<label for="optThreshold-div-thr">Threshold</label>'+
-							'<input class="form-control" type="number" id="optThreshold-div-thr" style="text-align:right" oninput=onChangeThresholdValue('+raster_id+') onchange=onChangeThresholdValue('+raster_id+') value=0 min=-1 max=1 step=0.001 onkeypress="return isNumericKey(event)">'+
-						'</div>'
+						'<table style="width:100%;font-size:10pt;color:#ffffff">'+
+							'<tr>'+
+								'<td style="width:48%">'+
+										"Instructions: Look at the histogram above and see the threshold value you want to apply. You can also click on the chart to automatically set the value. "+
+										"To finish, click on Generate, and give a name. "+
+										"To leave, click on Go to Visualization. "+
+								'</td>'+
+								'<td>'+
+									"<b>NOTE: When changing the threshold value, the layer will preview the final result. </b>"+
+									'<div class="custom-form-control" style="padding-left:10px">'+
+										'<label for="optThreshold-div-thr">Threshold</label>'+ 
+										'<input class="form-control" type="number" id="optThreshold-div-thr" style="text-align:right" value=0 min=-1 max=1 step=0.001 onkeypress="return isNumericKey(event)">'+ //oninput=onChangeThresholdValue('+raster_id+') onchange=onChangeThresholdValue('+raster_id+')
+									'</div>'+
+								'</td>'+
+							'</tr>'+
+						'</table>'
 					)
 					$('#new-info-edit-threshold #new-info-edit-threshold-active-exitbtn').append(
 						"<a onclick=onClickThresholdButton('"+type+"','"+kind+"',"+roi_id+","+simulation_id+","+simulation_imageset_id+") class='btn btn-sm btn-primary'>Go to Visualization</a>"+
@@ -4407,9 +4417,49 @@
 								hchart = addHistogramChart('histogram', tdata, 'Value', 'Quantity')
 								//hchart.showLoading('Loading, please wait...');		
 								//unpack data
+								custom_processinglevel_name =  'Auto threshold '+thr_val
+								points = hchart.series[0].points
+								points_idx = 0
+								for (var p=0; p<points.length; p++){
+									if (points[p].category <= parseFloat(thr_val)){ points_idx = p }
+									else{ break }
+								}
+								//value for plotline in histogram is an index from the list of points.
+								//only the index with nearest value is the chosen one.
+								hchart.xAxis[0].addPlotLine({
+									value: points_idx,
+									color: 'red',
+									width: 3,
+									id: 'auto_threshold',
+									label: {
+										text: '<span class=spanish_inquisition id=auto_threshold_span style="display:none">' + custom_processinglevel_name +'</span>',
+										y: -5,
+										x: 0,
+										useHTML: true,
+										style: { color: '#ffffff',
+											padding: '2px',
+											backgroundColor: 'red',
+											verticalAlign: 'middle',
+											fontWeight: 'bold',
+											fontSize: '10px',
+											cursor: 'pointer'
+										}
+									},
+									events: {
+										mouseover: function(e) {
+											console.log(this.id)
+											$('#'+this.id+'_span').show()
+										},
+										mouseout: function(e) {
+											$('span .spanish_inquisition').hide();
+										}
+									}
+								})
+								
 								console.log('----add data to chart-----')
 								$('#optThreshold-div-thr').val(thr_val)
-								onChangeThresholdValue(raster_id)			
+								onChangeChkboxImagesetShowOutput2(true, false, kind, roi_id, simulation_id, simulation_imageset_id, null, raster_id) //add wi layer
+								//onChangeThresholdValue(raster_id)			
 							}
 							else{
 								//console.log(answer)
